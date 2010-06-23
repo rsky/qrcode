@@ -1827,6 +1827,9 @@ static PHP_METHOD(QRCode, __construct)
 {
 	qrcode_object *intern = NULL;
 	zval *options = NULL;
+#if PHP_VERSION_ID >= 50300
+	zend_error_handling error_handling;
+#endif
 
 	int version = QR_DEFAULT(version);
 	int mode = QR_DEFAULT(mode);
@@ -1835,6 +1838,16 @@ static PHP_METHOD(QRCode, __construct)
 	int maxnum = QR_DEFAULT(maxnum);
 	int errcode = QR_ERR_NONE;
 
+#if PHP_VERSION_ID >= 50300
+	zend_replace_error_handling(EH_THROW, qrexception_ce, &error_handling TSRMLS_CC);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a",
+			&options) == FAILURE)
+	{
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
+		return;
+	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
+#else
 	php_set_error_handling(EH_THROW, qrexception_ce TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a",
 			&options) == FAILURE)
@@ -1843,6 +1856,7 @@ static PHP_METHOD(QRCode, __construct)
 		return;
 	}
 	php_std_error_handling();
+#endif
 
 	intern = qrcode_get_object();
 	if (intern->qr != NULL && intern->st != NULL) {
@@ -1887,9 +1901,22 @@ static PHP_METHOD(QRCode, setErrorHandling)
 {
 	qrcode_object *intern = NULL;
 	int errmode = PHP_QR_ERRMODE_EXCEPTION;
+#if PHP_VERSION_ID >= 50300
+	zend_error_handling error_handling;
+#endif
 
 	intern = qrcode_get_object();
 
+#if PHP_VERSION_ID >= 50300
+	zend_replace_error_handling(EH_THROW, qrexception_ce, &error_handling TSRMLS_CC);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
+			&errmode) == FAILURE)
+	{
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
+		return;
+	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
+#else
 	php_set_error_handling(EH_THROW, qrexception_ce TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
 			&errmode) == FAILURE)
@@ -1898,6 +1925,7 @@ static PHP_METHOD(QRCode, setErrorHandling)
 		return;
 	}
 	php_std_error_handling();
+#endif
 
 	switch (errmode) {
 	  case PHP_QR_ERRMODE_SILENT:
