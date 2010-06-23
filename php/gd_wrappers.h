@@ -1,5 +1,5 @@
 /*
- * Extra image functions: GD's function wrappers
+ * QR Code generator extension for PHP: GD's function wrappers
  *
  * Copyright (c) 2007-2010 Ryusuke SEKIYAMA. All rights reserved.
  *

@@ -1,5 +1,5 @@
 /*
- * Extra image functions: GD's function wrappers
+ * QR Code generator extension for PHP: GD's function wrappers
  *
  * Copyright (c) 2007-2010 Ryusuke SEKIYAMA. All rights reserved.
  *
@@ -463,7 +463,7 @@ _qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC)
 
 	if (result && Z_TYPE(output) == IS_STRING) {
 		*size = (int)Z_STRLEN(output);
-		return Z_STRVAL(output);
+		return (void *)Z_STRVAL(output);
 	} else {
 		zval_dtor(&output);
 		*size = 0;
