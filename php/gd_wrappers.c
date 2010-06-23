@@ -389,7 +389,7 @@ PHP_QR_LOCAL int
 _qr_fcall_info_init(const char *name, qr_fcall_info *info TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(info->name);
-	ZVAL_STRING(info->name, (char *)name, 0);
+	ZVAL_STRING(info->name, (char *)name, 1);
 
 #if PHP_VERSION_ID >= 50300
 	return zend_fcall_info_init(info->name, 0, &info->fci, &info->fcc, NULL, NULL TSRMLS_CC);
