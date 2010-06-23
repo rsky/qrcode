@@ -1,7 +1,7 @@
 /**
  * QR Code generator extension for PHP
  *
- * Copyright (c) 2007-2008 Ryusuke SEKIYAMA. All rights reserved.
+ * Copyright (c) 2007-2010 Ryusuke SEKIYAMA. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -21,11 +21,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * @package     php_qr
+ * @package     php-qr
  * @author      Ryusuke SEKIYAMA <rsky0711@gmail.com>
- * @copyright   2007-2008 Ryusuke SEKIYAMA
+ * @copyright   2007-2010 Ryusuke SEKIYAMA
  * @license     http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version     SVN: $Id$
  */
 
 #ifndef _PHP_QR_H_
