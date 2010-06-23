@@ -1,0 +1,113 @@
+
+   <section id='qr.requirements'>
+    &reftitle.required;
+    &no.requirement;
+
+   </section>
+
+
+   <section id='qr.install'>
+    &reftitle.install;
+    <para>Requires <literal>gdlib-config</literal></para>
+    <para>Requires <literal>zlib-dir</literal></para>
+
+   </section>
+
+
+   <section id='qr.configuration'>
+    &reftitle.runtime;
+    <table>
+     <title>qr runtime configuration</title>
+      <tgroup cols='3'>
+       <thead>
+        <row>
+         <entry>directive</entry>
+         <entry>default value</entry>
+         <entry>descrpition</entry>
+        </row>
+       </thead>
+      <tbody>
+    <row>
+     <entry>default_version</entry>
+     <entry>-1</entry>
+     <entry>version number: -1 (auto) or 1-40
+</entry>
+    </row>
+    <row>
+     <entry>default_mode</entry>
+     <entry>QR_EM_AUTO</entry>
+     <entry>encoding mode: auto, numeric, alnum, 8bit or kanji (case insensitive)
+</entry>
+    </row>
+    <row>
+     <entry>default_eclevel</entry>
+     <entry>QR_ECL_M</entry>
+     <entry>error correction level: L, M, Q or H (case insensitive)
+</entry>
+    </row>
+    <row>
+     <entry>default_masktype</entry>
+     <entry>-1</entry>
+     <entry>mask pattern type: -1 (auto) or 1-8
+</entry>
+    </row>
+    <row>
+     <entry>default_format</entry>
+     <entry>QR_FMT_DIGIT</entry>
+     <entry>output format: DIGIT, ASCII, JSON, PBM, BMP, SVG, TIFF, GIF, JPEG, PNG or WBMP (case insensitive)
+</entry>
+    </row>
+    <row>
+     <entry>default_magnify</entry>
+     <entry>1</entry>
+     <entry>pixel magnifying ratio: positive number
+</entry>
+    </row>
+    <row>
+     <entry>default_separator</entry>
+     <entry>4</entry>
+     <entry>separator width: 0 or positive number
+</entry>
+    </row>
+    <row>
+     <entry>default_maxnum</entry>
+     <entry>1</entry>
+     <entry>maximum number of symbols: 1-16
+</entry>
+    </row>
+    <row>
+     <entry>default_order</entry>
+     <entry>0</entry>
+     <entry>ordering method of symbols, in case the value, $n is ...
+= 0 (default): order to square as possible
+>= 1: order each $n symbols to horizontal
+<= -1: order each $n symbols to vertical
+</entry>
+    </row>
+     </tbody>
+    </tgroup>
+   </table>
+
+   </section>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

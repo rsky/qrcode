@@ -1,0 +1,25 @@
+include mk/pre.mk
+
+CFLAGS += -fno-common -fno-strict-aliasing
+
+DLL_SUFFIX := .dylib
+MYSHAREDLIBS := $(MYLIBNAME).$(LIBVERSION)$(DLL_SUFFIX) $(MYLIBNAME).$(VMAJOR)$(DLL_SUFFIX) $(MYLIBNAME)$(DLL_SUFFIX)
+
+$(MYLIBNAME)$(DLL_SUFFIX): $(MYOBJECTS)
+	$(CC) -dynamiclib -flat_namespace -fPIC \
+	  -install_name $(LIBDIR)/$(MYLIBNAME).$(VMAJOR).dylib \
+	  $(LDFLAGS) $(LIBS) -o $(MYLIBNAME).$(LIBVERSION).dylib $(MYOBJECTS)
+	ln -f -s $(MYLIBNAME).$(LIBVERSION).dylib $(MYLIBNAME).$(VMAJOR).dylib
+	ln -f -s $(MYLIBNAME).$(LIBVERSION).dylib $(MYLIBNAME).dylib
+
+## $(VMAJOR) >= 1:
+#$(MYLIBNAME)$(DLL_SUFFIX): $(MYOBJECTS)
+#	$(CC) -dynamiclib -flat_namespace -fPIC \
+#	  -install_name $(LIBDIR)/$(MYLIBNAME).$(VMAJOR).dylib \
+#	  -current_version $(LIBVERSION) \
+#	  -compatibility_version $(VMAJOR) \
+#	  $(LDFLAGS) $(LIBS) -o $(MYLIBNAME).$(LIBVERSION).dylib $(MYOBJECTS)
+#	ln -f -s $(MYLIBNAME).$(LIBVERSION).dylib $(MYLIBNAME).$(VMAJOR).dylib
+#	ln -f -s $(MYLIBNAME).$(LIBVERSION).dylib $(MYLIBNAME).dylib
+
+include mk/post.mk

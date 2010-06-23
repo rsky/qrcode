@@ -1,0 +1,9 @@
+include mk/pre.mk
+
+# Sorry, this Makefile is not completed.
+
+BIN_SUFFIX := .exe
+DLL_SUFFIX := .dll
+MYSHAREDLIBS := $(MYLIBNAME)$(DLL_SUFFIX)
+
+include mk/post.mk

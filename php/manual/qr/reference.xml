@@ -1,0 +1,285 @@
+<?xml version='1.0' encoding='iso-8859-1'?>
+<!-- $Revision: 1.1 $ -->
+ <reference id='ref.qr'>
+  <title>QR-Code Generator</title>
+  <titleabbrev>qr</titleabbrev>
+
+  <partintro>
+   <section id='qr.intro'>
+    &reftitle.intro;
+    <para>
+
+    </para>
+   </section>
+   
+   &reference.qr.configure;
+
+   <section id='qr.resources'>
+    &reftitle.resources;
+   &no.resource;
+   </section>
+
+   <section id='qr.constants'>
+    &reftitle.constants;
+    <table>
+     <title>qr constants</title>
+      <tgroup cols='3'>
+       <thead>
+        <row>
+         <entry>name</entry>
+         <entry>type</entry>
+         <entry>descrpition</entry>
+        </row>
+       </thead>
+      <tbody>
+
+        <row>
+         <entry>
+          <constant id='constantqr-em-auto'>QR_EM_AUTO</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>encoding modeauto
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-em-numeric'>QR_EM_NUMERIC</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>encoding modenumeric
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-em-alnum'>QR_EM_ALNUM</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>encoding modeuppercase alphabet and numeric
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-em-8bit'>QR_EM_8BIT</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>encoding mode8-bit byte
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-em-kanji'>QR_EM_KANJI</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>encoding modeJIS X 0208 Kanji
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-ecl-l'>QR_ECL_L</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>error correction level: L (7%)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-ecl-m'>QR_ECL_M</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>error correction level: M (15%)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-ecl-q'>QR_ECL_Q</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>error correction level: Q (25%)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-ecl-h'>QR_ECL_H</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>error correction level: H (30%)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-digit'>QR_FMT_DIGIT</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: DIGIT (space separated array of 0 and 1)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-ascii'>QR_FMT_ASCII</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: ASCII ART (white module is " " and black module is "*")
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-json'>QR_FMT_JSON</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: JSON (JavaScript style multi dimension array of 0 and 1)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-pbm'>QR_FMT_PBM</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: PBM (Portable Bitmap)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-bmp'>QR_FMT_BMP</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: BMP (Windows Bitmap)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-svg'>QR_FMT_SVG</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: SVG (XML/Scalable Vector Graphics)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-tiff'>QR_FMT_TIFF</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: TIFF
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-gif'>QR_FMT_GIF</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: GIF
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-jpeg'>QR_FMT_JPEG</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: GIF
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-png'>QR_FMT_PNG</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: PNG
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-fmt-wbmp'>QR_FMT_WBMP</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>output format: WBMP (Wireless Bitmap)
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-gd-enabled'>QR_GD_ENABLED</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>If defined, GIF/JPEG/PNG/WBMP output, qr_image_resource() and QRCode::getImageResource() are available.
+</entry>
+        </row>
+
+
+        <row>
+         <entry>
+          <constant id='constantqr-tiff-enabled'>QR_TIFF_ENABLED</constant>
+         </entry>
+         <entry>int</entry>
+         <entry>If defined, TIFF output is available.
+</entry>
+        </row>
+
+     </tbody>
+    </tgroup>
+   </table>
+   </section>
+   
+  </partintro>
+
+&reference.qr.functions;
+
+ </reference>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

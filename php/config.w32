@@ -1,0 +1,8 @@
+// $ Id: $
+// vim:ft=javascript
+
+ARG_ENABLE('qr' , 'QR-Code Generator', 'no');
+if (PHP_QR == "yes") {
+  EXTENSION("qr", "php_qr.c", "libqr/qr.c");
+  AC_DEFINE("HAVE_QR", 1, "qr support");
+}

@@ -1,0 +1,5 @@
+ &reference.qr.functions.qr-extension;
+ &reference.qr.functions.qr-get-symbol;
+ &reference.qr.functions.qr-image-resource;
+ &reference.qr.functions.qr-mimetype;
+ &reference.qr.functions.qr-output-symbol;
