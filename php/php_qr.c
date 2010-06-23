@@ -29,9 +29,7 @@
  */
 
 #include "php_qr.h"
-#ifdef ZEND_ENGINE_2
 #include <Zend/zend_exceptions.h>
-#endif
 #include "qr.h"
 #include "qr_util.h"
 #include <main/php_logos.h>
@@ -70,8 +68,6 @@ static PHP_FUNCTION(qr_mimetype);
 static PHP_FUNCTION(qr_extension);
 /*static PHP_FUNCTION(qr_imagetype);*/
 
-#ifdef ZEND_ENGINE_2
-
 static PHP_METHOD(QRCode, __construct);
 static PHP_METHOD(QRCode, setErrorHandling);
 static PHP_METHOD(QRCode, setFormat);
@@ -97,8 +93,6 @@ static PHP_METHOD(QRCode, rewind);
 static PHP_METHOD(QRCode, valid);
 static PHP_METHOD(QRCode, seek);
 static PHP_METHOD(QRCode, count);
-
-#endif
 
 /* }}} */
 
@@ -216,12 +210,7 @@ _qr_imagetype(zval *zv, int format TSRMLS_DC);
 
 /* }}} */
 
-#ifndef getThis
-#define getThis() NULL
-#endif
-
 /* {{{ Argument information of qr_* functions */
-#ifdef ZEND_BEGIN_ARG_INFO
 
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 #define ARG_INFO_STATIC static
@@ -267,18 +256,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_qr_imagetype, 0)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 */
-#else
-
-#define arginfo_qr_get_symbol NULL
-#define arginfo_qr_output_symbol NULL
-#define arginfo_qr_image_resource third_arg_force_ref
-#define arginfo_qr_mimetype NULL
-#define arginfo_qr_extension NULL
-/*#define arginfo_qr_imagetype NULL*/
-
-#endif
 /* }}} */
-#ifdef ZEND_ENGINE_2
 /* {{{ Argument information of QRCode methods */
 
 ARG_INFO_STATIC
@@ -562,7 +540,6 @@ static zend_function_entry qrcode_methods[] = {
 };
 
 /* }}} Class definitions*/
-#endif
 
 /* {{{ qr_functions[] */
 static zend_function_entry qr_functions[] = {
@@ -581,7 +558,6 @@ static zend_function_entry qr_functions[] = {
 
 /* {{{ cross-extension dependencies */
 
-#if ZEND_EXTENSION_API_NO >= 220050617
 static zend_module_dep qr_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 #ifdef PHP_QR_GD_BUNDLED
@@ -589,19 +565,15 @@ static zend_module_dep qr_deps[] = {
 #endif
 	{NULL, NULL, NULL, 0}
 };
-#endif
+
 /* }}} */
 
 /* {{{ qr_module_entry
  */
 zend_module_entry qr_module_entry = {
-#if ZEND_EXTENSION_API_NO >= 220050617
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	qr_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"qr",
 	qr_functions,
 	PHP_MINIT(qr),
@@ -610,15 +582,11 @@ zend_module_entry qr_module_entry = {
 	NULL,
 	PHP_MINFO(qr),
 	PHP_QR_MODULE_VERSION,
-#if ZEND_EXTENSION_API_NO >= 220060519
 	PHP_MODULE_GLOBALS(qr),
 	PHP_GINIT(qr),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
-#else
-	STANDARD_MODULE_PROPERTIES
-#endif
 };
 /* }}} */
 
@@ -626,37 +594,9 @@ zend_module_entry qr_module_entry = {
 ZEND_GET_MODULE(qr)
 #endif
 
-#ifndef ZEND_ENGINE_2
-#define OnUpdateLong OnUpdateInt
-#endif
-
 /* {{{ QrOnUpdateLongGEZero()
  */
-#if (defined(PHP_VERSION_ID) && PHP_VERSION_ID > 50200) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION >= 4)
 #define QrOnUpdateLongGEZero OnUpdateLongGEZero
-#else
-static ZEND_INI_MH(QrOnUpdateLongGEZero)
-{
-	long l;
-	long *p;
-	char *base;
-
-#ifndef ZTS
-	base = (char *)mh_arg2;
-#else
-	base = (char *)ts_resource(*((int *)mh_arg2));
-#endif
-
-	l = zend_atoi(new_value, new_value_length);
-	if (l >= 0) {
-		p = (long *)(base + (size_t)mh_arg1);
-		*p = l;
-		return SUCCESS;
-	}
-
-	return FAILURE;
-}
-#endif
 /* }}} */
 
 /* {{{ QrOnUpdateLongGTZero()
@@ -984,7 +924,6 @@ PHP_MINIT_FUNCTION(qr)
 	REGISTER_LONG_CONSTANT("QR_TIFF_ENABLED", 0, CONST_PERSISTENT | CONST_CS);
 #endif
 
-#ifdef ZEND_ENGINE_2
 	/* fetch exception class entries */
 	ext_ce_RuntimeException = _qr_get_class_entry("runtimeexception" TSRMLS_CC);
 	if (ext_ce_RuntimeException == NULL) {
@@ -1085,7 +1024,6 @@ PHP_MINIT_FUNCTION(qr)
 		qrexception_ce = zend_register_internal_class_ex(&ce,
 				ext_ce_RuntimeException, NULL TSRMLS_CC);
 	}
-#endif
 
 	return SUCCESS;
 }
@@ -1538,7 +1476,6 @@ _qr_imagetype(zval *zv, int format TSRMLS_DC)
 }*/
 /* }}} */
 
-#ifdef ZEND_ENGINE_2
 /* {{{ _qr_get_class_entry()
  * get the class entry
  */
@@ -1556,7 +1493,6 @@ _qr_get_class_entry(char *class_name TSRMLS_DC)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ proto string qr_get_symbol(string data[, array options])
    */
@@ -1820,7 +1756,6 @@ static PHP_FUNCTION(qr_extension)
 }*/
 /* }}} qr_imagetype */
 
-#ifdef ZEND_ENGINE_2
 /* {{{ proto void QRCode::__construct([array options])
    */
 static PHP_METHOD(QRCode, __construct)
@@ -2552,7 +2487,6 @@ static PHP_METHOD(QRCode, count)
 	}
 }
 /* }}} QRCode::count */
-#endif
 
 /*
  * Local variables:
