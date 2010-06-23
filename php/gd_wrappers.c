@@ -49,7 +49,7 @@ static zval *
 _qr_init_args(int argc TSRMLS_DC, ...);
 
 static void *
-_qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_CC);
+_qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC);
 
 static void
 _rsrc_to_fake(zval **rsrc TSRMLS_DC);
@@ -441,7 +441,7 @@ _qr_init_args(int argc TSRMLS_DC, ...)
 /* {{{ _qr_output_capture() */
 
 static void *
-_qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_CC)
+_qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC)
 {
 	zval output, *retval = NULL;
 	zend_bool result = 0;
