@@ -26,7 +26,7 @@ if test "$PHP_QR" != "no"; then
   fi
 
   AC_DEFINE(QR_STATIC_BUILD, 1, [build libqr as static library])
-  QRCONVERTERS="libqr/qrcnv.c libqr/qrcnv_bmp.c libqr/qrcnv_svg.c"
+  QR_SOURCES="php_qr.c libqr/qr.c libqr/qrcnv.c libqr/qrcnv_bmp.c libqr/qrcnv_svg.c"
 
   dnl
   dnl Check the gd support
@@ -35,7 +35,7 @@ if test "$PHP_QR" != "no"; then
     AC_DEFINE(PHP_QR_ENABLE_GD, 1, [enable GD support])
     AC_DEFINE(PHP_QR_GD_BUNDLED, 1, [use gd extension])
     AC_DEFINE(QR_ENABLE_GD, 1, [enable GD support in libqr])
-    QRCONVERTERS="$QRCONVERTERS libqr/qrcnv_gd.c"
+    QR_SOURCES="$QR_SOURCES libqr/qrcnv_gd.c"
   fi
 
   dnl
@@ -84,12 +84,20 @@ if test "$PHP_QR" != "no"; then
 
     AC_DEFINE(PHP_QR_ENABLE_TIFF, 1, [enable TIFF support])
     AC_DEFINE(QR_ENABLE_TIFF, 1, [enable TIFF support in libqr])
-    QRCONVERTERS="$QRCONVERTERS libqr/qrcnv_tiff.c"
+    QR_SOURCES="$QR_SOURCES libqr/qrcnv_tiff.c"
   fi
 
   PHP_ADD_INCLUDE(./libqr)
   PHP_SUBST(QR_SHARED_LIBADD)
-
   AC_DEFINE(HAVE_QR, 1, [ ])
-  PHP_NEW_EXTENSION(qr, libqr/qr.c $QRCONVERTERS php_qr.c, $ext_shared)
+
+  GDEXTRA_PHP_VERNUM=`"$PHP_CONFIG" --version | $AWK -F. '{ printf "%d", ($1 * 100 + $2) * 100 }'`
+  if test "$GDEXTRA_PHP_VERNUM" -ge 50300; then
+     QR_SOURCES="$QR_SOURCES gd_wrappers.c"
+     AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 1, [ ])
+  else
+     AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
+  fi
+
+  PHP_NEW_EXTENSION(qr, $QR_SOURCES , $ext_shared)
 fi

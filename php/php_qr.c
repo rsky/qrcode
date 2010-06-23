@@ -34,9 +34,13 @@
 #include <main/php_logos.h>
 #include "qr_logos.h"
 
+#if PHP_QR_USE_GD_WRAPPERS
+#include "gd_wrappers.h"
+#endif
+
 /* {{{ module globals */
 
-static ZEND_DECLARE_MODULE_GLOBALS(qr)
+PHP_QR_LOCAL ZEND_DECLARE_MODULE_GLOBALS(qr)
 
 /* }}} */
 
@@ -45,12 +49,8 @@ static ZEND_DECLARE_MODULE_GLOBALS(qr)
 static PHP_MINIT_FUNCTION(qr);
 static PHP_MSHUTDOWN_FUNCTION(qr);
 static PHP_MINFO_FUNCTION(qr);
-
-#if ZEND_EXTENSION_API_NO < 220060519
-#define PHP_GINIT_FUNCTION(qr) \
-	void _qr_init_globals(zend_qr_globals *qr_globals TSRMLS_DC)
-#endif
-
+static PHP_RINIT_FUNCTION(qr);
+static PHP_RSHUTDOWN_FUNCTION(qr);
 static PHP_GINIT_FUNCTION(qr);
 
 /* }}} */
@@ -577,8 +577,8 @@ zend_module_entry qr_module_entry = {
 	qr_functions,
 	PHP_MINIT(qr),
 	PHP_MSHUTDOWN(qr),
-	NULL,
-	NULL,
+	PHP_RINIT(qr),
+	PHP_RSHUTDOWN(qr),
 	PHP_MINFO(qr),
 	PHP_QR_MODULE_VERSION,
 	PHP_MODULE_GLOBALS(qr),
@@ -884,8 +884,8 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(qr)
 {
-#if ZEND_EXTENSION_API_NO < 220060519
-	ZEND_INIT_MODULE_GLOBALS(qr, _qr_init_globals, NULL)
+#if PHP_QR_USE_GD_WRAPPERS
+	_qr_wrappers_init(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 	REGISTER_INI_ENTRIES();
 	php_register_info_logo(QR_LOGO_GUID, QR_LOGO_TYPE, qr_logo, QR_LOGO_SIZE);
@@ -1097,6 +1097,55 @@ static PHP_GINIT_FUNCTION(qr)
 	qr_globals->default_separator = 4;
 	qr_globals->default_maxnum = 1;
 	qr_globals->default_order = 0;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION */
+static PHP_RINIT_FUNCTION(qr)
+{
+#if PHP_QR_USE_GD_WRAPPERS
+#define QR_FCALL_INFO_INIT(name) \
+	if (_qr_fcall_info_init("image" #name, \
+			&QRG(func_##name) TSRMLS_CC) == FAILURE) { \
+		return FAILURE; \
+	}
+	QR_FCALL_INFO_INIT(create);
+/*	QR_FCALL_INFO_INIT(destroy);*/
+	QR_FCALL_INFO_INIT(colorallocate);
+	QR_FCALL_INFO_INIT(palettecopy);
+	QR_FCALL_INFO_INIT(fill);
+	QR_FCALL_INFO_INIT(filledrectangle);
+	QR_FCALL_INFO_INIT(setpixel);
+	QR_FCALL_INFO_INIT(gif);
+	QR_FCALL_INFO_INIT(jpeg);
+	QR_FCALL_INFO_INIT(png);
+	QR_FCALL_INFO_INIT(wbmp);
+#undef QR_FCALL_INFO_INIT
+#endif
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+static PHP_RSHUTDOWN_FUNCTION(qr)
+{
+#if PHP_QR_USE_GD_WRAPPERS
+#define QR_FCALL_INFO_DESTROY(name) \
+	_qr_fcall_info_destroy(&QRG(func_##name) TSRMLS_CC)
+	QR_FCALL_INFO_DESTROY(create);
+/*	QR_FCALL_INFO_DESTROY(destroy);*/
+	QR_FCALL_INFO_DESTROY(colorallocate);
+	QR_FCALL_INFO_DESTROY(palettecopy);
+	QR_FCALL_INFO_DESTROY(fill);
+	QR_FCALL_INFO_DESTROY(filledrectangle);
+	QR_FCALL_INFO_DESTROY(setpixel);
+	QR_FCALL_INFO_DESTROY(gif);
+	QR_FCALL_INFO_DESTROY(jpeg);
+	QR_FCALL_INFO_DESTROY(png);
+	QR_FCALL_INFO_DESTROY(wbmp);
+#undef QR_FCALL_INFO_DESTROY
+#endif
+	return SUCCESS;
 }
 /* }}} */
 

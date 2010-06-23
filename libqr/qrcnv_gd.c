@@ -15,22 +15,24 @@
 #ifdef PHP_QR_GD_BUNDLED
 /* {{{ PHP bundled GD */
 
+#if PHP_QR_USE_GD_WRAPPERS
+#include "gd_wrappers.h"
+#else
 #include <ext/gd/libgd/gd.h>
 #include <ext/gd/libgd/gdhelpers.h>
+#endif
 
 #ifdef gdImageGifPtr
+#if !PHP_QR_USE_GD_WRAPPERS
 void *php_gd_gdImageGifPtr(gdImagePtr im, int *size);
+#endif
 #else
 void *gdImageGifPtr(gdImagePtr im, int *size);
 #endif
 
-#define QR_PHP_GD_API
+#define QR_GD_API PHP_QR_LOCAL
 
-#if PHP_MAJOR_VERSION > 4
 #define QRCNV_PNG_BASEFILTER , 0
-#else
-#define QRCNV_PNG_BASEFILTER
-#endif
 
 /* }}} */
 #else
@@ -38,7 +40,7 @@ void *gdImageGifPtr(gdImagePtr im, int *size);
 
 #include <gd.h>
 
-#define QR_PHP_GD_API static
+#define QR_GD_API static
 
 #define QRCNV_PNG_BASEFILTER
 
@@ -62,10 +64,10 @@ void *gdImageGifPtr(gdImagePtr im, int *size);
 
 /* {{{ function prototypes */
 
-QR_PHP_GD_API gdImagePtr
+QR_GD_API gdImagePtr
 qrSymbolToGdImagePtr(QRCode *qr, int sep, int mag, int *fgcolor, int *bgcolor);
 
-QR_PHP_GD_API gdImagePtr
+QR_GD_API gdImagePtr
 qrsSymbolsToGdImagePtr(QRStructured *st,
 		int sep, int mag, int order, int *fgcolor, int *bgcolor);
 
@@ -103,7 +105,7 @@ qrsFreeGIFAnim(gdImagePtr ims[], int num, qr_byte_t *sbuf, void *ibuf);
 /*
  * 生成されたQRコードシンボルをGD形式のイメージに変換する
  */
-QR_PHP_GD_API gdImagePtr
+QR_GD_API gdImagePtr
 qrSymbolToGdImagePtr(QRCode *qr, int sep, int mag, int *fgcolor, int *bgcolor)
 {
 	gdImagePtr im;
@@ -173,7 +175,7 @@ qrSymbolToImage(QRCode *qr, int fmt, int sep, int mag, int *size)
 /*
  * 生成されたQRコードシンボルをGD形式のイメージに変換する
  */
-QR_PHP_GD_API gdImagePtr
+QR_GD_API gdImagePtr
 qrsSymbolsToGdImagePtr(QRStructured *st,
 		int sep, int mag, int order, int *fgcolor, int *bgcolor)
 {
