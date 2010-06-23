@@ -457,10 +457,11 @@ _qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_CC)
 		zval_ptr_dtor(&retval);
 	}
 
+	INIT_ZVAL(output);
 	php_ob_get_buffer(&output TSRMLS_CC);
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
 
-	if (result) {
+	if (result && Z_TYPE(output) == IS_STRING) {
 		*size = (int)Z_STRLEN(output);
 		return Z_STRVAL(output);
 	} else {
