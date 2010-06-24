@@ -472,7 +472,7 @@ _qr_fake_resource(zval *rsrc TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
 
-	if (zend_hash_index_find(&EG(regular_list), (ulong)Z_LVAL_PP(rsrc), (void **)&le) == SUCCESS) {
+	if (zend_hash_index_find(&EG(regular_list), (ulong)Z_LVAL_P(rsrc), (void **)&le) == SUCCESS) {
 		le->ptr = NULL;
 		le->type = le_fake;
 	}
