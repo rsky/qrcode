@@ -1,0 +1,10 @@
+QR Code generator module for Python
+
+INSTALL:
+  python setup.py build
+  python setup.py install
+OR
+  python setup-no-gd.py build
+  python setup-no-gd.py install
+
+setup.py requires GD2 library.
