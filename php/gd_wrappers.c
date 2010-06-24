@@ -31,10 +31,6 @@
 #include <stdarg.h>
 #include <main/php_output.h>
 
-#ifndef PHP_QR_GD_WRAPPERS_DEBUG
-#define PHP_QR_GD_WRAPPERS_DEBUG 0
-#endif
-
 /* {{{ globals */
 
 ZEND_EXTERN_MODULE_GLOBALS(qr);
