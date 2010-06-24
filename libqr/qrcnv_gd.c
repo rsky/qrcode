@@ -30,7 +30,11 @@ void *php_gd_gdImageGifPtr(gdImagePtr im, int *size);
 void *gdImageGifPtr(gdImagePtr im, int *size);
 #endif
 
-#define QR_GD_API PHP_QR_LOCAL
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define QR_GD_API __attribute__((visibility("hidden")))
+#else
+#define QR_GD_API
+#endif
 
 #define QRCNV_PNG_BASEFILTER , 0
 

@@ -148,14 +148,14 @@ _qrs_get_symbols(const qr_byte_t *data, int data_len,
  * convert the QR Code symbol to the GD image resource
  * (libqr/qrcnv_gd.c)
  */
-gdImagePtr
+PHP_QR_LOCAL gdImagePtr
 qrSymbolToGdImagePtr(QRCode *qr, int sep, int mag, int *fgcolor, int *bgcolor);
 
 /**
  * convert the structured append QR Code symbol to the GD image resource
  * (libqr/qrcnv_gd.c)
  */
-gdImagePtr
+PHP_QR_LOCAL gdImagePtr
 qrsSymbolsToGdImagePtr(QRStructured *st, int sep, int mag, int order, int *fgcolor, int *bgcolor);
 
 /**
