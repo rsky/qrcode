@@ -62,7 +62,8 @@ _qr_gdImageFill(gdImagePtr im, int x, int y, int color);
 
 PHP_QR_LOCAL void
 _qr_gdImageFilledRectangle(gdImagePtr im,
-                           int x1, int y1, int x2, int y2,
+                           int x1, int y1,
+                           int x2, int y2,
                            int color);
 
 PHP_QR_LOCAL void

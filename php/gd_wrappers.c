@@ -28,9 +28,7 @@
  */
 
 #include "gd_wrappers.h"
-#if PHP_VERSION_ID < 50300
 #include <stdarg.h>
-#endif
 #include <main/php_output.h>
 
 #ifndef PHP_QR_GD_WRAPPERS_DEBUG
@@ -40,7 +38,7 @@
 /* {{{ globals */
 
 ZEND_EXTERN_MODULE_GLOBALS(qr);
-static int le_fake_rsrc, le_gd;
+static int le_fake, le_gd;
 
 /* }}} */
 /* {{{ internal function prototypes */
@@ -52,7 +50,7 @@ static void *
 _qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC);
 
 static void
-_rsrc_to_fake(zval **rsrc TSRMLS_DC);
+_qr_fake_resource(zval *rsrc TSRMLS_DC);
 
 /* }}} */
 /* {{{ _qr_wrappers_init() */
@@ -60,10 +58,10 @@ _rsrc_to_fake(zval **rsrc TSRMLS_DC);
 PHP_QR_LOCAL int
 _qr_wrappers_init(INIT_FUNC_ARGS)
 {
-	le_fake_rsrc = zend_register_list_destructors(NULL, NULL, module_number);
+	le_fake = zend_register_list_destructors(NULL, NULL, module_number);
 	le_gd = phpi_get_le_gd();
 
-	return le_fake_rsrc;
+	return le_fake;
 }
 
 /* }}} */
@@ -73,7 +71,7 @@ PHP_QR_LOCAL gdImagePtr
 _qr_gdImageCreate(int sx, int sy)
 {
 	TSRMLS_FETCH();
-	gdImagePtr im;
+	gdImagePtr im = NULL;
 	zval *retval = NULL, *args, *zsx, *zsy;
 
 	MAKE_STD_ZVAL(zsx);
@@ -88,11 +86,9 @@ _qr_gdImageCreate(int sx, int sy)
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_RESOURCE) {
 			ZEND_FETCH_RESOURCE_NO_RETURN(im, gdImagePtr, &retval, -1, "Image", le_gd);
-			_rsrc_to_fake(&retval TSRMLS_CC);
+			_qr_fake_resource(retval TSRMLS_CC);
 		}
 		zval_ptr_dtor(&retval);
-	} else {
-		im = NULL;
 	}
 	zval_ptr_dtor(&args);
 
@@ -142,7 +138,7 @@ _qr_gdImageColorAllocate(gdImagePtr im, int r, int g, int b)
 		}
 		zval_ptr_dtor(&retval);
 	}
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 
 	return color;
@@ -169,8 +165,8 @@ _qr_gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src)
 	if (retval) {
 		zval_ptr_dtor(&retval);
 	}
-	_rsrc_to_fake(&zdst TSRMLS_CC);
-	_rsrc_to_fake(&zsrc TSRMLS_CC);
+	_qr_fake_resource(zdst TSRMLS_CC);
+	_qr_fake_resource(zsrc TSRMLS_CC);
 	zval_ptr_dtor(&args);
 }
 
@@ -199,7 +195,7 @@ _qr_gdImageFill(gdImagePtr im, int x, int y, int color)
 	if (retval) {
 		zval_ptr_dtor(&retval);
 	}
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 }
 
@@ -208,7 +204,8 @@ _qr_gdImageFill(gdImagePtr im, int x, int y, int color)
 
 PHP_QR_LOCAL void 
 _qr_gdImageFilledRectangle(gdImagePtr im,
-                           int x1, int y1, int x2, int y2,
+                           int x1, int y1,
+                           int x2, int y2,
                            int color)
 {
 	TSRMLS_FETCH();
@@ -234,7 +231,7 @@ _qr_gdImageFilledRectangle(gdImagePtr im,
 	if (retval) {
 		zval_ptr_dtor(&retval);
 	}
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 }
 
@@ -273,7 +270,7 @@ _qr_gdImageSetPixel(gdImagePtr im, int x, int y, int color)
 			if (retval) {
 				zval_ptr_dtor(&retval);
 			}
-			_rsrc_to_fake(&zim TSRMLS_CC);
+			_qr_fake_resource(zim TSRMLS_CC);
 			zval_ptr_dtor(&args);
 		} else {
 			gdImagePalettePixel(im, x, y) = color;
@@ -299,7 +296,7 @@ _qr_gdImageGifPtr(gdImagePtr im, int *size)
 
 	args = _qr_init_args(1 TSRMLS_CC, zim);
 	buf = _qr_output_capture(&QRG(func_gif), args, size TSRMLS_CC);
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 
 	return buf;
@@ -324,7 +321,7 @@ _qr_gdImageJpegPtr(gdImagePtr im, int *size, int quality)
 
 	args = _qr_init_args(3 TSRMLS_CC, zim, zfilename, zquality);
 	buf = _qr_output_capture(&QRG(func_jpeg), args, size TSRMLS_CC);
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 
 	return buf;
@@ -351,7 +348,7 @@ _qr_gdImagePngPtrEx(gdImagePtr im, int *size, int level, int basefilter)
 
 	args = _qr_init_args(4 TSRMLS_CC, zim, zfilename, zquality, zfilter);
 	buf = _qr_output_capture(&QRG(func_png), args, size TSRMLS_CC);
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 
 	return buf;
@@ -376,7 +373,7 @@ _qr_gdImageWBMPPtr(gdImagePtr im, int *size, int fg)
 
 	args = _qr_init_args(3 TSRMLS_CC, zim, zfilename, zforeground);
 	buf = _qr_output_capture(&QRG(func_wbmp), args, size TSRMLS_CC);
-	_rsrc_to_fake(&zim TSRMLS_CC);
+	_qr_fake_resource(zim TSRMLS_CC);
 	zval_ptr_dtor(&args);
 
 	return buf;
@@ -472,38 +469,16 @@ _qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC)
 }
 
 /* }}} */
-/* {{{ _rsrc_to_fake() */
+/* {{{ _qr_fake_resource() */
 
 static void
-_rsrc_to_fake(zval **rsrc TSRMLS_DC)
+_qr_fake_resource(zval *rsrc TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
 
-#if PHP_QR_GD_WRAPPERS_DEBUG
-	if (Z_TYPE_PP(rsrc) != IS_RESOURCE) {
-		zend_error(E_ERROR, "_rsrc_to_fake() accepts only resource value");
-		return;
-	}
-#endif
-
 	if (zend_hash_index_find(&EG(regular_list), (ulong)Z_LVAL_PP(rsrc), (void **)&le) == SUCCESS) {
-#if PHP_QR_GD_WRAPPERS_DEBUG
-		if (le->type != le_gd) {
-			const char *type_name = zend_rsrc_list_get_rsrc_type(le->type TSRMLS_CC);
-			zend_error(E_ERROR, "_rsrc_to_fake(): type of the reource"
-					" is not '%s' (#%d) but '%s' (#%d)",
-					zend_rsrc_list_get_rsrc_type(le_gd TSRMLS_CC), le_gd,
-					((type_name == NULL) ? "(null)" : type_name), le->type);
-			return;
-		}
-		if (le->refcount != 1) {
-			zend_error(E_ERROR, "_rsrc_to_fake(): reference count of the resource"
-					" is not 1 but %d", le->refcount);
-			return;
-		}
-#endif
 		le->ptr = NULL;
-		le->type = le_fake_rsrc;
+		le->type = le_fake;
 	}
 }
 
