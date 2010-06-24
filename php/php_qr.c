@@ -1160,21 +1160,6 @@ _qr_parse_options(HashTable *options,
 {
 	zval tmp, **entry;
 
-#ifdef IS_UNICODE
-#define QR_FETCH_OPTION(name) \
-	if (zend_ascii_hash_find(options, #name, sizeof(#name), (void **)&entry) == SUCCESS) { \
-		if (name != NULL) { \
-			if (Z_TYPE_PP(entry) == IS_LONG) { \
-				*name = (int)Z_LVAL_PP(entry); \
-			} else { \
-				tmp = **entry; \
-				zval_copy_ctor(&tmp); \
-				convert_to_long(&tmp); \
-				*name = (int)Z_LVAL(tmp); \
-			} \
-		} \
-	}
-#else
 #define QR_FETCH_OPTION(name) \
 	if (zend_hash_find(options, #name, sizeof(#name), (void **)&entry) == SUCCESS) { \
 		if (name != NULL) { \
@@ -1188,7 +1173,6 @@ _qr_parse_options(HashTable *options,
 			} \
 		} \
 	}
-#endif
 
 	QR_FETCH_OPTION(version)
 	QR_FETCH_OPTION(mode)
@@ -1420,32 +1404,6 @@ _qr_stream_open(zval *zv, char *alt_url, char *mode,
 		  case IS_RESOURCE:
 			php_stream_from_zval_no_verify(stream, &zv);
 			break;
-#ifdef IS_UNICODE
-		  case IS_STRING:
-		  case IS_UNICODE:
-			if (Z_UNILEN_P(zv) > 0) {
-				zval tmp = *zv;
-
-				zval_copy_ctor(&tmp);
-
-				if (Z_TYPE(tmp) == IS_UNICODE) {
-					if (FAILURE == zval_unicode_to_string_ex(&tmp,
-							ZEND_U_CONVERTER(UG(filesystem_encoding_conv)) TSRMLS_CC))
-					{
-						break;
-					}
-				}
-
-				/* php_stream_u_open_wrapper_ex is verbose in this case  */
-				stream = php_stream_open_wrapper(Z_STRVAL(tmp),
-						mode, IGNORE_URL | options, opened_path);
-
-				zval_dtor(&tmp);
-			} else {
-				open_alt_url = 1;
-			}
-			break;
-#else
 		  case IS_STRING:
 			if (Z_STRLEN_P(zv) > 0) {
 				stream = php_stream_open_wrapper(Z_STRVAL_P(zv),
@@ -1454,7 +1412,6 @@ _qr_stream_open(zval *zv, char *alt_url, char *mode,
 				open_alt_url = 1;
 			}
 			break;
-#endif
 		  case IS_NULL:
 			open_alt_url = 1;
 			break;
