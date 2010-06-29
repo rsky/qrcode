@@ -28,8 +28,6 @@ main($debug);
  */
 function main($debug = true)
 {
-    $package = init(configure(PACAGE_YML));
-
     if (file_exists(PACAGE_XML)) {
         fputs(STDOUT, 'ignore existing package.xml? [y/N]: ');
         $noChangeLog = (0 === strncasecmp(trim(fgets(STDIN)), 'y', 1));
@@ -37,18 +35,16 @@ function main($debug = true)
         $noChangeLog = false;
     }
     if ($noChangeLog) {
-        $time = filemtime(PACAGE_XML);
-        $data = file_get_contents(PACAGE_XML);
-        unlink(PACAGE_XML);
+        rename(PACAGE_XML, PACAGE_XML . '.orig');
     }
 
+    $package = init(configure(PACAGE_YML));
     $package->generateContents();
 
     if ($debug) {
         $package->debugPackageFile();
         if ($noChangeLog) {
-            file_put_contents(PACAGE_XML, $data);
-            touch(PACAGE_XML, $time);
+            rename(PACAGE_XML . '.orig', PACAGE_XML);
         }
     } else {
         $package->writePackageFile();
@@ -86,6 +82,7 @@ function configure($yaml)
     $ignore = array(
         'package.php',
         'package.xml',
+        'package.xml.orig',
         'package.yml',
         'config.w32',
         "{$name}.dsp",
@@ -115,9 +112,9 @@ function configure($yaml)
         'README'        => 'doc',
     );
     if (isset($options['exceptions'])) {
-        $exceptions = array_merge($exceptions, glob_keys($options['exceptions']));
+        $exceptions = array_merge($exceptions, $options['exceptions']);
     }
-    $cfg['options']['exceptions'] = $exceptions;
+    $cfg['options']['exceptions'] = glob_keys($exceptions);
 
     return $cfg;
 }
