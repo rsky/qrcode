@@ -4,7 +4,7 @@ INSTALL:
   python setup.py build
   python setup.py install
 OR
-  python setup-no-gd.py build
-  python setup-no-gd.py install
+  python setup-gd.py build
+  python setup-gd.py install
 
-setup.py requires GD2 library.
+setup-gd.py requires GD2 library.
