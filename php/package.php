@@ -3,7 +3,7 @@
 namespace MkPackage;
 
 require_once 'PEAR/PackageFileManager2.php';
-require_once 'symfony/yaml/sfYaml.php';
+require_once 'SymfonyComponents/YAML/sfYaml.php';
 
 \PEAR::setErrorHandling(PEAR_ERROR_DIE);
 date_default_timezone_set('UTC');
