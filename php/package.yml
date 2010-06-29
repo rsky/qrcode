@@ -1,0 +1,44 @@
+# package information
+type: extsrc
+channel: pecl.opendogs.org
+name: qr
+summary: 'QR Code generator extension.'
+description: 'QR Code generator extension.'
+license: 'MIT License'
+licenseUri: 'http://www.opensource.org/licenses/mit-license.php'
+maintainers:
+  -
+    role: lead
+    handle: rsk
+    name: 'Ryusuke SEKIYAMA'
+    email: rsky0711@gmail.com
+
+# release information
+version: 0.4.0
+apiVersion: 0.4.0
+stability: beta
+apiStability: beta
+notes: '- Initial release on PEAR channel.'
+
+# dependencies
+phpDep: 5.2.3
+pearDep: 1.4.1
+
+# configure options
+configureOptions:
+  - 
+    name: enable-qr-gd
+    prompt: 'Enable GIF, JPEG, PNG, WBMP output support'
+    default: yes
+  - 
+    name: with-qr-tiff
+    prompt: 'Enable zlib compressed TIFF output support'
+    default: yes
+
+# packaging options
+options:
+  ignore:
+    - libqr/Makefile.*
+    - libqr/mk/*
+  dir_roles:
+    libqr: src

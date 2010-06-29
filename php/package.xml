@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.9.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>qr</name>
+ <channel>pecl.opendogs.org</channel>
+ <summary>QR Code generator extension.</summary>
+ <description>QR Code generator extension.</description>
+ <lead>
+  <name>Ryusuke SEKIYAMA</name>
+  <user>rsk</user>
+  <email>rsky0711@gmail.com</email>
+  <active>yes</active>
+ </lead>
+ <date>2010-06-29</date>
+ <time>21:43:00</time>
+ <version>
+  <release>0.4.0</release>
+  <api>0.4.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/mit-license.php">MIT License</license>
+ <notes>
+- Initial release on PEAR channel.
+ </notes>
+ <contents>
+  <dir baseinstalldir="/" name="/">
+   <file baseinstalldir="/" md5sum="11e1a78ed0efddef60684634578266eb" name="examples/example-oo.php" role="data" />
+   <file baseinstalldir="/" md5sum="75ad3d19d5dbabef6f3ad530b7b755d7" name="examples/example-oo2.php" role="data" />
+   <file baseinstalldir="/" md5sum="d2c8cf9e2945e071b200bc258d6884a2" name="examples/example.php" role="data" />
+   <file baseinstalldir="/" md5sum="d406c0ca650591daecd91a3020f63093" name="examples/example2.php" role="data" />
+   <file baseinstalldir="/" md5sum="cf40ac5fa27cc3ba0d44c44a455f9b64" name="libqr/LICENSE" role="src" />
+   <file baseinstalldir="/" md5sum="66490ab9650baba4dfaaab55895c1130" name="libqr/qr.c" role="src" />
+   <file baseinstalldir="/" md5sum="67a34e86b4dc6a789a97da2348e8f9f8" name="libqr/qr.h" role="src" />
+   <file baseinstalldir="/" md5sum="502df87dadf7105f1bd89046990f72f9" name="libqr/qrcmd.c" role="src" />
+   <file baseinstalldir="/" md5sum="2fdaf7d6ca2d2867c10f002d381c9cba" name="libqr/qrcmd.h" role="src" />
+   <file baseinstalldir="/" md5sum="0e81b5a9b98a74612f780c2ee6957ff1" name="libqr/qrcnv.c" role="src" />
+   <file baseinstalldir="/" md5sum="517d5b994da88dfb2cd4dee8ec972654" name="libqr/qrcnv.h" role="src" />
+   <file baseinstalldir="/" md5sum="231ac3aa691d44f5b7b43e80765293db" name="libqr/qrcnv_bmp.c" role="src" />
+   <file baseinstalldir="/" md5sum="0d18c0a5828e63884770bc095774fa2d" name="libqr/qrcnv_gd.c" role="src" />
+   <file baseinstalldir="/" md5sum="6e82bf1984df3edab2bf0b96be9196a8" name="libqr/qrcnv_svg.c" role="src" />
+   <file baseinstalldir="/" md5sum="1c9fc811245b60bdd1dbabb158b71128" name="libqr/qrcnv_tiff.c" role="src" />
+   <file baseinstalldir="/" md5sum="3c35c7fe97d2b330ba27807b1b33e483" name="libqr/qr_dwtable.h" role="src" />
+   <file baseinstalldir="/" md5sum="254529b70cecfd7ef6366b40e2b1dc5d" name="libqr/qr_private.h" role="src" />
+   <file baseinstalldir="/" md5sum="91dc230878229fcd30c5cbebabc4a93a" name="libqr/qr_util.h" role="src" />
+   <file baseinstalldir="/" md5sum="7c816cccba0453973c50e06ca5adb36b" name="libqr/README" role="src" />
+   <file baseinstalldir="/" md5sum="058bcb4b61cd8b63d7d65b9cd51e76dc" name="libqr/TODO" role="src" />
+   <file baseinstalldir="/" md5sum="2b19ece1941e8c1887f1551761e875f4" name="manual/file-entities.ent" role="doc" />
+   <file baseinstalldir="/" md5sum="d1bf926a75a1a0257dcc800ea9a208a6" name="manual/functions.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="5ca05f19f9969a84185344f3b9eae1f8" name="manual/Makefile" role="doc" />
+   <file baseinstalldir="/" md5sum="417261323bcb0bc4ed9862585ad04071" name="manual/manual.xml.in" role="doc" />
+   <file baseinstalldir="/" md5sum="ac23427b2ab216ef86010fa850e78c56" name="manual/qr/configure.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="0468a9eabc80aaa2294c8d1939d945b4" name="manual/qr/reference.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="0df58d14b9cee91f59367bd5686d081f" name="manual/qr/functions/qr-extension.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="d0093fefca1c67d78cfb8aacd41633b0" name="manual/qr/functions/qr-get-symbol.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="1f9ecdde70e7c00b0806a3f1aff652ec" name="manual/qr/functions/qr-image-resource.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="31dd4b1439fe5cbb7ff6584c35f61d4c" name="manual/qr/functions/qr-mimetype.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="c533ee6161f76af705e6b42e798b40ae" name="manual/qr/functions/qr-output-symbol.xml" role="doc" />
+   <file baseinstalldir="/" md5sum="686fd124bc662459099b60ddb055259e" name="tests/common.inc" role="test" />
+   <file baseinstalldir="/" md5sum="02d73de80b9d06ddd4e844462ec151a2" name="tests/skipif.inc" role="test" />
+   <file baseinstalldir="/" md5sum="181d6cc4ade70f38a23a8d1bc9150daa" name="tests/skipif_gd.inc" role="test" />
+   <file baseinstalldir="/" md5sum="4cfce920975057510341745a89d62a07" name="tests/skipif_oo.inc" role="test" />
+   <file baseinstalldir="/" md5sum="cfcbd3233dfc458e3822f7e4b625f60d" name="tests/skipif_tiff.inc" role="test" />
+   <file baseinstalldir="/" md5sum="7d6462822c1866c70dc2396eda74afaf" name="config.m4" role="src" />
+   <file baseinstalldir="/" md5sum="93733d5c224a1aed58edca23a0177e3d" name="CREDITS" role="doc" />
+   <file baseinstalldir="/" md5sum="7291f1b05a4608bc9223993fd2bea6c2" name="EXPERIMENTAL" role="doc" />
+   <file baseinstalldir="/" md5sum="3c85625039c710f31efb2da3bca0c48a" name="gd_wrappers.c" role="src" />
+   <file baseinstalldir="/" md5sum="8d4f52510e1d4ad8dcb066de4eab76ee" name="gd_wrappers.h" role="src" />
+   <file baseinstalldir="/" md5sum="cf40ac5fa27cc3ba0d44c44a455f9b64" name="LICENSE" role="doc" />
+   <file baseinstalldir="/" md5sum="9ddad5bee9bc28a0790091a416c20013" name="php_qr.c" role="src" />
+   <file baseinstalldir="/" md5sum="897977a8b50715d6d904789b589b3b6c" name="php_qr.h" role="src" />
+   <file baseinstalldir="/" md5sum="0c36ce9205794b6938c0785a1ea5f534" name="qr_logos.h" role="src" />
+   <file baseinstalldir="/" md5sum="8d9c9de0f7524a6711fd34cb8f4f0527" name="README" role="doc" />
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.2.3</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>qr</providesextension>
+ <extsrcrelease>
+  <configureoption default="yes" name="enable-qr-gd" prompt="Enable GIF, JPEG, PNG, WBMP output support" />
+  <configureoption default="yes" name="with-qr-tiff" prompt="Enable zlib compressed TIFF output support" />
+ </extsrcrelease>
+ <changelog>
+  <release>
+   <version>
+    <release>0.4.0</release>
+    <api>0.4.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-06-29</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.php">MIT License</license>
+   <notes>
+- Initial release on PEAR channel.
+   </notes>
+  </release>
+ </changelog>
+</package>
