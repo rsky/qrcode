@@ -405,8 +405,12 @@ qrcode_object_new_ex(qrcode_object **object, zend_class_entry *ce TSRMLS_DC)
 	}
 
 	zend_object_std_init(&intern->std, ce TSRMLS_CC);
+#if PHP_API_VERSION < 20100412
 	zend_hash_copy(intern->std.properties, &ce->default_properties,
 			(copy_ctor_func_t)zval_add_ref, NULL, sizeof(zval *));
+#else
+	object_properties_init(&intern->std, ce);
+#endif
 
 	intern->qr = NULL;
 	intern->st = NULL;
