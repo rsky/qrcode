@@ -10,7 +10,7 @@ PHP_ARG_ENABLE(qr-gd, [whether to QR Code GD support],
                         by the PHP GD extension], yes, no)
 
 PHP_ARG_WITH(qr-tiff, [whether to QR Code TIFF support],
-[  --with-qr-tiff[[=DIR]]  Enable TIFF output support by the zlib.
+[  --with-qr-tiff[[=DIR]]  Enable zlib compressed TIFF output support.
                         DIR is zlib install prefix], no, no)
 
 if test "$PHP_QR" != "no"; then
