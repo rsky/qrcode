@@ -439,7 +439,11 @@ _qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC)
 	zval output, *retval = NULL;
 	zend_bool result = 0;
 
+#if PHP_API_VERSION >= 20100412
+	php_output_start_user(NULL, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+#else
 	php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
+#endif
 
 	zend_fcall_info_call(&info->fci, &info->fcc,
 	                     &retval, args TSRMLS_CC);
@@ -451,8 +455,13 @@ _qr_output_capture(qr_fcall_info *info, zval *args, int *size TSRMLS_DC)
 	}
 
 	INIT_ZVAL(output);
+#if PHP_API_VERSION >= 20100412
+	php_output_get_contents(&output TSRMLS_CC);
+	php_output_discard(TSRMLS_C);
+#else
 	php_ob_get_buffer(&output TSRMLS_CC);
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
+#endif
 
 	if (result && Z_TYPE(output) == IS_STRING) {
 		*size = (int)Z_STRLEN(output);
