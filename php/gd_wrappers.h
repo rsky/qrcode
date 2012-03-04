@@ -31,6 +31,7 @@
 #define _PHP_QR_GD_WRAPPERS_H_
 
 #include "php_qr.h"
+#include <ext/gd/php_gd.h>
 #include <ext/gd/libgd/gd.h>
 #include <ext/gd/libgd/gdhelpers.h>
 

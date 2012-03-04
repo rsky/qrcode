@@ -36,6 +36,8 @@
 
 #if PHP_QR_USE_GD_WRAPPERS
 #include "gd_wrappers.h"
+#else
+#include <ext/gd/php_gd.h>
 #endif
 
 /* {{{ module globals */
