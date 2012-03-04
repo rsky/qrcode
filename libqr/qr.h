@@ -6,7 +6,7 @@
  *
  * @package     libqr
  * @author      Ryusuke SEKIYAMA <rsky0711@gmail.com>
- * @copyright   2006-2010 Ryusuke SEKIYAMA
+ * @copyright   2006-2012 Ryusuke SEKIYAMA
  * @license     http://www.opensource.org/licenses/mit-license.php  MIT License
  */
 

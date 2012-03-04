@@ -1,7 +1,7 @@
 /**
  * QR Code generator module for Python
  *
- * Copyright (c) 2007-2010 Ryusuke SEKIYAMA. All rights reserved.
+ * Copyright (c) 2007-2012 Ryusuke SEKIYAMA. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,7 +23,7 @@
  *
  * @package     pyqr
  * @author      Ryusuke SEKIYAMA <rsky0711@gmail.com>
- * @copyright   2007-2010 Ryusuke SEKIYAMA
+ * @copyright   2007-2012 Ryusuke SEKIYAMA
  * @license     http://www.opensource.org/licenses/mit-license.php  MIT License
  */
 
