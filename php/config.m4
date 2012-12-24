@@ -93,10 +93,10 @@ if test "$PHP_QR" != "no"; then
 
   GDEXTRA_PHP_VERNUM=`"$PHP_CONFIG" --version | $AWK -F. '{ printf "%d", ($1 * 100 + $2) * 100 }'`
   if test "$GDEXTRA_PHP_VERNUM" -ge 50300; then
-     QR_SOURCES="$QR_SOURCES gd_wrappers.c"
-     AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 1, [ ])
+    QR_SOURCES="$QR_SOURCES gd_wrappers.c"
+    AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 1, [ ])
   else
-     AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
+    AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
   fi
 
   PHP_NEW_EXTENSION(qr, $QR_SOURCES , $ext_shared)

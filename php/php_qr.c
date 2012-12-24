@@ -77,10 +77,11 @@ static PHP_METHOD(QRCode, setMagnify);
 static PHP_METHOD(QRCode, setOrder);
 static PHP_METHOD(QRCode, addData);
 static PHP_METHOD(QRCode, readData);
-static PHP_METHOD(QRCode, remains);
+/*static PHP_METHOD(QRCode, remains);*/
 static PHP_METHOD(QRCode, finalize);
 static PHP_METHOD(QRCode, getSymbol);
 static PHP_METHOD(QRCode, outputSymbol);
+static PHP_METHOD(QRCode, getInfo);
 #ifdef PHP_QR_GD_BUNDLED
 static PHP_METHOD(QRCode, getImageResource);
 #endif
@@ -528,6 +529,7 @@ static zend_function_entry qrcode_methods[] = {
 	PHP_ME(QRCode, finalize,         NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, getSymbol,        NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, outputSymbol,     arginfo_qrcode_output_symbol,  ZEND_ACC_PUBLIC)
+	PHP_ME(QRCode, getInfo,          NULL,                          ZEND_ACC_PUBLIC)
 #ifdef PHP_QR_GD_BUNDLED
 	PHP_ME(QRCode, getImageResource, arginfo_qrcode_get_image_resource, ZEND_ACC_PUBLIC)
 #endif
@@ -541,7 +543,7 @@ static zend_function_entry qrcode_methods[] = {
 	PHP_ME(QRCode, valid,            NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, seek,             arginfo_qrcode_seek,           ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, count,            NULL,                          ZEND_ACC_PUBLIC)
-	{ NULL, NULL, NULL }
+	{ NULL, NULL, NULL, 0, 0 }
 };
 
 /* }}} Class definitions*/
@@ -557,7 +559,7 @@ static zend_function_entry qr_functions[] = {
 	PHP_FE(qr_mimetype,         arginfo_qr_mimetype)
 	PHP_FE(qr_extension,        arginfo_qr_extension)
 /*	PHP_FE(qr_imagetype,        arginfo_qr_imagetype)*/
-	{ NULL, NULL, NULL }
+	{ NULL, NULL, NULL, 0, 0 }
 };
 /* }}} */
 
@@ -568,7 +570,7 @@ static zend_module_dep qr_deps[] = {
 #ifdef PHP_QR_GD_BUNDLED
 	ZEND_MOD_REQUIRED("gd")
 #endif
-	{NULL, NULL, NULL, 0}
+	{ NULL, NULL, NULL, 0 }
 };
 
 /* }}} */
@@ -1330,7 +1332,6 @@ _qr_get_gdimage(const qr_byte_t *data, int data_len,
 {
 	QRCode *qr = NULL;
 	gdImagePtr im = NULL;
-	int errcode = QR_ERR_NONE;
 
 	qr = _qr_create_simple(data, data_len, version, mode, eclevel, masktype TSRMLS_CC);
 	if (!qr) {
@@ -1361,7 +1362,6 @@ _qrs_get_gdimage(const qr_byte_t *data, int data_len,
 {
 	QRStructured *st;
 	gdImagePtr im = NULL;
-	int errcode = QR_ERR_NONE;
 
 	st = _qrs_create_simple(data, data_len, version, mode, eclevel, masktype, maxnum TSRMLS_CC);
 	if (!st) {
@@ -2213,6 +2213,44 @@ static PHP_METHOD(QRCode, outputSymbol)
 	RETURN_LONG((long)output_size);
 }
 /* }}} QRCode::outputSymbol */
+
+/* {{{ proto array QRCode::getInfo(void)
+   */
+static PHP_METHOD(QRCode, getInfo)
+{
+	qrcode_object *intern = NULL;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	intern = qrcode_get_object();
+	array_init(return_value);
+
+	if (intern->st) {
+		add_assoc_bool(return_value, "structured",  1);
+		add_assoc_long(return_value, "max_symbols", intern->st->max);
+		add_assoc_long(return_value, "num_symbols", intern->st->num);
+		add_assoc_long(return_value, "version",     intern->st->param.version);
+		add_assoc_long(return_value, "mode",        intern->st->param.mode);
+		add_assoc_long(return_value, "eclevel",     intern->st->param.eclevel);
+		add_assoc_long(return_value, "masktype",    intern->st->param.masktype);
+	} else {
+		add_assoc_bool(return_value, "structured",  0);
+		add_assoc_long(return_value, "max_symbols", 1);
+		add_assoc_long(return_value, "num_symbols", 1);
+		add_assoc_long(return_value, "version",     intern->qr->param.version);
+		add_assoc_long(return_value, "mode",        intern->qr->param.mode);
+		add_assoc_long(return_value, "eclevel",     intern->qr->param.eclevel);
+		add_assoc_long(return_value, "masktype",    intern->qr->param.masktype);
+	}
+	add_assoc_long(return_value, "errmode",   intern->errmode);
+	add_assoc_long(return_value, "format",    intern->format);
+	add_assoc_long(return_value, "separator", intern->separator);
+	add_assoc_long(return_value, "magnify",   intern->magnify);
+	add_assoc_long(return_value, "order",     intern->order);
+}
+/* }}} QRCode::getInfo */
 
 #ifdef PHP_QR_GD_BUNDLED
 /* {{{ proto resource QRCode::getImageResource([array &colors])
