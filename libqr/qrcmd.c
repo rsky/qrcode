@@ -226,6 +226,8 @@ qrShowHelp(void)
 #ifdef QR_ENABLE_GD
 	",");
 	writeln("                          GIF, JPEG, PNG, WBMP"
+#elif defined(QR_ENABLE_PNG)
+	", PNG"
 #endif
 	);
 	writeln("                        These are case-insensitive and some have aliases.");
@@ -469,6 +471,9 @@ qrGetParameter(int argc, char **argv,
 				*fmt = QR_FMT_PNG;
 			} else if (!strcasecmp(ptr, "wbmp")) {
 				*fmt = QR_FMT_WBMP;
+#elif defined(QR_ENABLE_PNG)
+			} else if (!strcasecmp(ptr, "png")) {
+				*fmt = QR_FMT_PNG;
 #endif /* QR_ENABLE_GD */
 			} else {
 				errx(1, "%s: %s", ptr, qrStrError(QR_ERR_INVALID_FMT));

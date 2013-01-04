@@ -2403,6 +2403,8 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 		qrSymbolToJPEG,
 		qrSymbolToPNG,
 		qrSymbolToWBMP
+#elif defined(QR_ENABLE_PNG)
+		NULL, NULL, qrSymbolToPNG, NULL
 #else
 		NULL, NULL, NULL, NULL
 #endif /* QR_ENABLE_GD */
@@ -2510,6 +2512,8 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 		qrsSymbolsToJPEG,
 		qrsSymbolsToPNG,
 		qrsSymbolsToWBMP
+#elif defined(QR_ENABLE_PNG)
+		NULL, NULL, qrsSymbolsToPNG, NULL
 #else
 		NULL, NULL, NULL, NULL
 #endif /* QR_ENABLE_GD */

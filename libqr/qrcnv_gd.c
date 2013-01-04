@@ -638,6 +638,7 @@ qrSymbolToJPEG(QRCode *qr, int sep, int mag, int *size)
 #endif
 }
 
+#ifndef QR_ENABLE_PNG
 /*
  * 生成されたQRコードシンボルをGDを用いてPNG画像に変換する
  */
@@ -650,6 +651,7 @@ qrSymbolToPNG(QRCode *qr, int sep, int mag, int *size)
 	return qrSymbolToImage(qr, QR_FMT_PNG, sep, mag, size);
 #endif
 }
+#endif
 
 /*
  * 生成されたQRコードシンボルをGDを用いてWBMP画像に変換する
@@ -693,6 +695,7 @@ qrsSymbolsToJPEG(QRStructured *st, int sep, int mag, int order, int *size)
 #endif
 }
 
+#ifndef QR_ENABLE_PNG
 /*
  * 生成されたQRコードシンボルをGDを用いてPNG画像に変換する
  */
@@ -705,6 +708,7 @@ qrsSymbolsToPNG(QRStructured *st, int sep, int mag, int order, int *size)
 	return qrsSymbolsToImage(st, QR_FMT_PNG, sep, mag, order, size);
 #endif
 }
+#endif
 
 /*
  * 生成されたQRコードシンボルをGDを用いてWBMP画像に変換する

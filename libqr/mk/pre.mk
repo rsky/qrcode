@@ -5,7 +5,7 @@ LIBDIR ?= $(INSTALL_PREFIX)/lib
 INCDIR ?= $(INSTALL_PREFIX)/include
 
 CC ?= gcc
-CFLAGS += -O2 -g -Wall
+CFLAGS += -Os -g -fPIC -Wall -Wextra
 
 VMAJOR := 0
 VMINOR := 0
@@ -21,5 +21,8 @@ all: qr qrs $(MYLIBNAME).a
 # If you don't want to compile with TIFF support, comment out next line.
 include mk/tiff.mk
 
-# If you don't want to compile with GD support, comment out next line.
-include mk/gd.mk
+# If you don't want to compile with PNG support, comment out next line.
+include mk/png.mk
+
+# If you don want to compile with GD support, enable next line.
+#include mk/gd.mk
