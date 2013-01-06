@@ -837,6 +837,9 @@ static ZEND_INI_MH(QrOnUpdateFormat)
 		*p = QR_FMT_PNG;
 	} else if (value_length == 4 && strcasecmp("wbmp", value) == 0) {
 		*p = QR_FMT_WBMP;
+#elif PHP_QR_ENABLE_PNG
+	} else if (value_length == 3 && strcasecmp("png", value) == 0) {
+		*p = QR_FMT_PNG;
 #endif
 	} else {
 		long foramt = zend_atoi(new_value, new_value_length);
@@ -846,8 +849,13 @@ static ZEND_INI_MH(QrOnUpdateFormat)
 				return FAILURE;
 			}
 #endif
+#if !defined(PHP_QR_ENABLE_PNG) && !defined(PHP_QR_GD_BUNDLED)
+			if (foramt == QR_FMT_PNG) {
+				return FAILURE;
+			}
+#endif
 #ifndef PHP_QR_GD_BUNDLED
-			if (foramt == QR_FMT_GIF || foramt == QR_FMT_JPEG || foramt == QR_FMT_PNG || foramt == QR_FMT_WBMP) {
+			if (foramt == QR_FMT_GIF || foramt == QR_FMT_JPEG || foramt == QR_FMT_WBMP) {
 				return FAILURE;
 			}
 #endif
@@ -999,8 +1007,13 @@ PHP_MINIT_FUNCTION(qr)
 
 #ifdef PHP_QR_GD_BUNDLED
 		QRCODE_DECLARE_CONSTANT_EX(GD_ENABLED, 1L);
+		QRCODE_DECLARE_CONSTANT_EX(PNG_ENABLED, 1L);
+#elif defined(PHP_QR_ENABLE_PNG)
+		QRCODE_DECLARE_CONSTANT_EX(GD_ENABLED, 0);
+		QRCODE_DECLARE_CONSTANT_EX(PNG_ENABLED, 1L);
 #else
 		QRCODE_DECLARE_CONSTANT_EX(GD_ENABLED, 0);
+		QRCODE_DECLARE_CONSTANT_EX(PNG_ENABLED, 0);
 #endif
 #ifdef PHP_QR_ENABLE_TIFF
 		QRCODE_DECLARE_CONSTANT_EX(TIFF_ENABLED, 1L);

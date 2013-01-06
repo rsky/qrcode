@@ -7,10 +7,14 @@ PHP_ARG_ENABLE(qr, [whether to enable QR Code support],
 
 PHP_ARG_ENABLE(qr-gd, [whether to QR Code GD support],
 [  --enable-qr-gd        Enable GIF, JPEG, PNG, WBMP output support
-                        by the PHP GD extension], yes, no)
+                        by the PHP GD extension], no, no)
+
+PHP_ARG_WITH(qr-png, [whether to QR Code PNG support],
+[  --with-qr-png[[=DIR]]   Enable PNG output support.
+                        DIR is zlib install prefix], yes, no)
 
 PHP_ARG_WITH(qr-tiff, [whether to QR Code TIFF support],
-[  --with-qr-tiff[[=DIR]]  Enable zlib compressed TIFF output support.
+[  --with-qr-tiff[[=DIR]]  Enable TIFF output support.
                         DIR is zlib install prefix], no, no)
 
 if test "$PHP_QR" != "no"; then
@@ -36,13 +40,27 @@ if test "$PHP_QR" != "no"; then
     AC_DEFINE(PHP_QR_GD_BUNDLED, 1, [use gd extension])
     AC_DEFINE(QR_ENABLE_GD, 1, [enable GD support in libqr])
     QR_SOURCES="$QR_SOURCES libqr/qrcnv_gd.c"
+
+    PHP_QR_PHP_VERNUM=`"$PHP_CONFIG" --version | $AWK -F. '{ printf "%d", ($1 * 100 + $2) * 100 }'`
+    if test "$PHP_QR_PHP_VERNUM" -ge 50300; then
+      QR_SOURCES="$QR_SOURCES gd_wrappers.c"
+      AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 1, [ ])
+    else
+      AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
+    fi
+  else
+    AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
   fi
 
   dnl
   dnl Check the zlib support
   dnl
-  if test "$PHP_QR_TIFF" != "no"; then
-    if test "$PHP_QR_TIFF" != "yes"; then
+  if test "$PHP_QR_PNG$PHP_QR_TIFF" != "nono"; then
+    if test "$PHP_QR_PNG" != "yes"; then
+      if test -r "$PHP_QR_PNG/include/zlib.h"; then
+        QR_ZLIB_DIR="$PHP_QR_PNG"
+      fi
+    elif test "$PHP_QR_TIFF" != "yes"; then
       if test -r "$PHP_QR_TIFF/include/zlib.h"; then
         QR_ZLIB_DIR="$PHP_QR_TIFF"
       fi
@@ -82,22 +100,20 @@ if test "$PHP_QR" != "no"; then
         -L$QR_ZLIB_DIR/lib
       ])
 
-    AC_DEFINE(PHP_QR_ENABLE_TIFF, 1, [enable TIFF support])
-    AC_DEFINE(QR_ENABLE_TIFF, 1, [enable TIFF support in libqr])
-    QR_SOURCES="$QR_SOURCES libqr/qrcnv_tiff.c"
+    if test "$PHP_QR_PNG" != "no"; then
+      AC_DEFINE(PHP_QR_ENABLE_PNG, 1, [enable PNG support])
+      AC_DEFINE(QR_ENABLE_PNG, 1, [enable PNG support in libqr])
+      QR_SOURCES="$QR_SOURCES libqr/qrcnv_png.c"
+    fi
+    if test "$PHP_QR_TIFF" != "no"; then
+      AC_DEFINE(PHP_QR_ENABLE_TIFF, 1, [enable TIFF support])
+      AC_DEFINE(QR_ENABLE_TIFF, 1, [enable TIFF support in libqr])
+      QR_SOURCES="$QR_SOURCES libqr/qrcnv_tiff.c"
+    fi
   fi
 
-  PHP_ADD_INCLUDE(./libqr)
+  PHP_ADD_INCLUDE(libqr)
   PHP_SUBST(QR_SHARED_LIBADD)
   AC_DEFINE(HAVE_QR, 1, [ ])
-
-  GDEXTRA_PHP_VERNUM=`"$PHP_CONFIG" --version | $AWK -F. '{ printf "%d", ($1 * 100 + $2) * 100 }'`
-  if test "$GDEXTRA_PHP_VERNUM" -ge 50300; then
-    QR_SOURCES="$QR_SOURCES gd_wrappers.c"
-    AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 1, [ ])
-  else
-    AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
-  fi
-
   PHP_NEW_EXTENSION(qr, $QR_SOURCES , $ext_shared)
 fi
