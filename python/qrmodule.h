@@ -32,12 +32,13 @@
 
 #include <Python.h>
 #include "qr.h"
-#include "qr_util.h"
 
-/* {{{ method prototypes */
+typedef struct _QRCodeObject QRCodeObject;
+
+/* {{{ qr module method prototypes */
 
 static PyObject *
-qr_qrcode(PyObject *self, PyObject *args, PyObject *keywds);
+qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds);
 
 static PyObject *
 qr_mimetype(PyObject *self, PyObject *args);
@@ -46,41 +47,76 @@ static PyObject *
 qr_extension(PyObject *self, PyObject *args);
 
 /* }}} */
+/* {{{ qr.QRCode type function prototypes */
+
+static int
+QRCode_init(QRCodeObject *self, PyObject *args, PyObject *kwds);
+
+static void
+QRCode_dealloc(QRCodeObject *self);
+
+/* }}} */
+/* {{{ qr.QRCode class method prototypes */
+
+static PyObject *
+QRCode_add_data(QRCodeObject *self, PyObject *args, PyObject *kwds);
+
+static PyObject *
+QRCode_read_data(QRCodeObject *self, PyObject *args, PyObject *kwds);
+
+static PyObject *
+QRCode_copy(QRCodeObject *self, PyObject *unused);
+
+static PyObject *
+QRCode_finalize(QRCodeObject *self, PyObject *unused);
+
+static PyObject *
+QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds);
+
+static PyObject *
+QRCode_output_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds);
+
+static PyObject *
+QRCode_get_info(QRCodeObject *self, PyObject *unused);
+
+/* }}} */
 /* {{{ internal function prototypes */
 
 static PyObject *
 _qr_process(const qr_byte_t *data, int data_len, FILE *out,
-		int version, int mode, int eclevel, int masktype,
-		int format, int magnify, int separator);
+            int version, int mode, int eclevel, int masktype,
+            int format, int magnify, int separator);
 
 static PyObject *
 _qrs_process(const qr_byte_t *data, int data_len, FILE *out,
-		int version, int mode, int eclevel, int masktype, int maxnum,
-		int format, int magnify, int separator, int order);
+             int version, int mode, int eclevel, int masktype, int maxnum,
+             int format, int magnify, int separator, int order);
 
 static QRCode *
 _qr_create_simple(const qr_byte_t *data, int data_len,
-		int version, int mode, int eclevel, int masktype);
+                  int version, int mode, int eclevel, int masktype);
 
 static QRStructured *
 _qrs_create_simple(const qr_byte_t *data, int data_len,
-		int version, int mode, int eclevel, int masktype, int maxnum);
+                   int version, int mode, int eclevel,
+                   int masktype, int maxnum);
 
 static qr_byte_t *
 _qr_get_symbol(QRCode *qr,
-		int format, int separator, int magnify, int *symbol_size);
+               int format, int separator, int magnify, int *symbol_size);
 
 static qr_byte_t *
 _qrs_get_symbols(QRStructured * st,
-		int format, int separator, int magnify, int order, int *symbol_size);
+                 int format, int separator, int magnify,
+                 int order, int *symbol_size);
 
 static int
 _qr_output_symbol(QRCode *qr, FILE *out,
-		int format, int separator, int magnify);
+                  int format, int separator, int magnify);
 
 static int
 _qrs_output_symbols(QRStructured * st, FILE *out,
-		int format, int separator, int magnify, int order);
+                    int format, int separator, int magnify, int order);
 
 static void
 _qr_set_get_error(int errcode, const char *errmsg);
@@ -96,7 +132,8 @@ _qr_set_output_error(int errcode, const char *errmsg);
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: nil;
  * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
+ * vim600: et sw=4 ts=4 fdm=marker
+ * vim<600: et sw=4 ts=4
  */
