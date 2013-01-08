@@ -52,7 +52,7 @@ struct _QRCodeObject {
 
 static PyObject *QRCodeError;
 
-static const char *activeFuncName;
+static const char *active_func_name;
 static const char * const fn_qrcode         = "qr.qrcode()";
 static const char * const fn_add_data       = "qr.QRCode.add_data()";
 static const char * const fn_copy           = "qr.QRCode.copy()";
@@ -169,7 +169,7 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
     int separator = 4;
     int order = 0;
 
-    activeFuncName = fn_qrcode;
+    active_func_name = fn_qrcode;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "s#|iiiiiiiii:qrcode", kwlist,
                                      &data, &data_len,
@@ -261,7 +261,7 @@ QRCode_add_data(QRCodeObject *self, PyObject *args, PyObject *kwds)
     int data_len = 0;
     int mode = PYQR_USE_DEFAULT_MODE;
 
-    activeFuncName = fn_add_data;
+    active_func_name = fn_add_data;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "s#|i:QRCode.add_data", kwlist,
@@ -289,7 +289,7 @@ QRCode_copy(QRCodeObject *self, PyObject *unused)
     QRCodeObject *copy;
     PyObject *obj;
 
-    activeFuncName = fn_copy;
+    active_func_name = fn_copy;
 
     if (self->qr) {
         qr = qrClone(self->qr, &errcode);
@@ -335,7 +335,7 @@ QRCode_copy(QRCodeObject *self, PyObject *unused)
 static PyObject *
 QRCode_finalize(QRCodeObject *self, PyObject *unused)
 {
-    activeFuncName = fn_finalize;
+    active_func_name = fn_finalize;
 
     if (self->qr) {
         if (!qrFinalize(self->qr)) {
@@ -406,7 +406,7 @@ QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
     int separator = self->separator;
     int order = self->order;
 
-    activeFuncName = fn_get_symbol;
+    active_func_name = fn_get_symbol;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "|iiii:QRCode.get_symbol", kwlist,
@@ -426,7 +426,7 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused)
 {
     PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
 
-    activeFuncName = fn_get_info;
+    active_func_name = fn_get_info;
 
     return NULL;
 }
@@ -1006,7 +1006,7 @@ PyMODINIT_FUNC initqr(void)
 static const char *
 PyQR_ActiveFuncName(void)
 {
-    return activeFuncName;
+    return active_func_name;
 }
 
 /* }}} */
