@@ -71,6 +71,12 @@ static PyObject *
 QRCode_finalize(QRCodeObject *self, PyObject *unused);
 
 static PyObject *
+QRCode_is_finalized(QRCodeObject *self, PyObject *unused);
+
+static PyObject *
+QRCode_has_data(QRCodeObject *self, PyObject *unused);
+
+static PyObject *
 QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds);
 
 static PyObject *

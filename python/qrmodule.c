@@ -117,6 +117,10 @@ static PyMethodDef QRCode_methods[] = {
         METH_CLASS | METH_NOARGS, NULL },
     { "finalize", (PyCFunction)QRCode_finalize,
         METH_CLASS | METH_NOARGS, NULL },
+    { "is_finalized", (PyCFunction)QRCode_is_finalized,
+        METH_CLASS | METH_NOARGS, NULL },
+    { "has_data", (PyCFunction)QRCode_has_data,
+        METH_CLASS | METH_NOARGS, NULL },
     { "get_symbol", (PyCFunction)QRCode_get_symbol,
         METH_CLASS | METH_KEYWORDS, NULL },
     { "output_symbol", (PyCFunction)QRCode_output_symbol,
@@ -346,8 +350,57 @@ QRCode_copy(QRCodeObject *self, PyObject *unused)
 static PyObject *
 QRCode_finalize(QRCodeObject *self, PyObject *unused)
 {
-    PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
-    return NULL;
+    if (self->qr) {
+        if (qrFinalize(self->qr)) {
+            Py_RETURN_TRUE;
+        }
+        PyErr_SetString(QRCodeError, qrGetErrorInfo(self->qr));
+    }
+    else if (self->st) {
+        if (qrsFinalize(self->st)) {
+            Py_RETURN_TRUE;
+        }
+        PyErr_SetString(QRCodeError, qrsGetErrorInfo(self->st));
+    }
+    Py_RETURN_FALSE;
+}
+
+/* }}} */
+/* {{{ QRCode_is_finalized() */
+
+static PyObject *
+QRCode_is_finalized(QRCodeObject *self, PyObject *unused)
+{
+    if (self->qr) {
+        if (qrIsFinalized(self->qr)) {
+            Py_RETURN_TRUE;
+        }
+    }
+    else if (self->st) {
+        if (qrsIsFinalized(self->st)) {
+            Py_RETURN_TRUE;
+        }
+    }
+    Py_RETURN_FALSE;
+}
+
+/* }}} */
+/* {{{ QRCode_has_data() */
+
+static PyObject *
+QRCode_has_data(QRCodeObject *self, PyObject *unused)
+{
+    if (self->qr) {
+        if (qrHasData(self->qr)) {
+            Py_RETURN_TRUE;
+        }
+    }
+    else if (self->st) {
+        if (qrsHasData(self->st)) {
+            Py_RETURN_TRUE;
+        }
+    }
+    Py_RETURN_FALSE;
 }
 
 /* }}} */
