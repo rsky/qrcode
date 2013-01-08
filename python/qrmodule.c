@@ -58,7 +58,6 @@ static const char * const fn_add_data       = "qr.QRCode.add_data()";
 static const char * const fn_copy           = "qr.QRCode.copy()";
 static const char * const fn_finalize       = "qr.QRCode.finalize()";
 static const char * const fn_get_symbol     = "qr.QRCode.get_symbol()";
-static const char * const fn_output_symbol  = "qr.QRCode.output_symbol()";
 static const char * const fn_get_info       = "qr.QRCode.get_info()";
 
 /* }}} */
@@ -69,15 +68,12 @@ PyDoc_STRVAR(qr_module__doc__,
 "\n"
 "This module provides following functions:\n"
 "\n"
-"qrcode(data,[output],...) -- Return a QR Code symbol as a string.\n"
+"qrcode(data,...) -- Return a QR Code symbol as a string.\n"
 "mimetype(format) -- Return a Content-Type for the given format.\n"
 "extension(format[, include_dot]) -- Return a filename extension.");
 
 PyDoc_STRVAR(qrcode__doc__,
-"qrcode(data,[output],...) -- Return a QR Code symbol as a string.\n"
-"\n"
-"Optional output is the target file object.\n"
-"If output is specified, returns None.\n"
+"qrcode(data,...) -- Return a QR Code symbol as a string.\n"
 "\n"
 "following options are also available:\n"
 "  version:   symbol version (1-40, default: auto)\n"
@@ -133,8 +129,6 @@ static PyMethodDef QRCode_methods[] = {
         METH_NOARGS, NULL },
     { "get_symbol", (PyCFunction)QRCode_get_symbol,
         METH_VARARGS | METH_KEYWORDS, NULL },
-    { "output_symbol", (PyCFunction)QRCode_output_symbol,
-        METH_VARARGS | METH_KEYWORDS, NULL },
     { "get_info", (PyCFunction)QRCode_get_info,
         METH_NOARGS, NULL },
     { NULL, NULL, 0, NULL }
@@ -155,7 +149,7 @@ static PyObject *
 qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {
-        "data", "output",
+        "data",
         "version", "mode", "eclevel", "masktype", "maxnum",
         "format", "separator", "magnify", "order",
         NULL
@@ -163,7 +157,6 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
 
     const char *data = NULL;
     int data_len = 0;
-    PyObject *output = NULL;
     PyObject *result = NULL;
 
     int version = -1;
@@ -178,8 +171,8 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
 
     activeFuncName = fn_qrcode;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s#|Oiiiiiiiii:qrcode", kwlist,
-                                     &data, &data_len, &output,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s#|iiiiiiiii:qrcode", kwlist,
+                                     &data, &data_len,
                                      &version, &mode, &eclevel,
                                      &masktype, &maxnum,
                                      &format, &separator, &magnify, &order)
@@ -199,17 +192,6 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
         result = PyQR_ProcessMulti((const qr_byte_t *)data, data_len,
                                    version, mode, eclevel, masktype, maxnum,
                                    format, magnify, separator, order);
-    }
-
-    if (result && output) {
-        if (PyFile_WriteObject(result, output, Py_PRINT_RAW) == -1) {
-            Py_DECREF(result);
-            result = NULL;
-        } else {
-            Py_DECREF(result);
-            result = Py_None;
-            Py_INCREF(result);
-        }
     }
 
     return result;
@@ -275,82 +257,24 @@ QRCode_add_data(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = { "data", "mode", NULL };
 
-    char *data = NULL;
-    Py_ssize_t data_len = 0;
+    const char *data = NULL;
+    int data_len = 0;
     int mode = PYQR_USE_DEFAULT_MODE;
-    PyObject *input = NULL;
-    PyObject *read = NULL;
-    PyObject *utf8 = NULL;
-    PyObject *result = NULL;
+
     activeFuncName = fn_add_data;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|i:QRCode.read_data", kwlist,
-                                     &input, &mode)
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "s#|i:QRCode.add_data", kwlist,
+                                     &data, &data_len, &mode)
     ) {
         return NULL;
     }
 
-    if (!PyQR_CheckString(input)) {
-        PyObject *reader = PyObject_GetAttrString(input, "read");
-        if (reader == NULL) {
-            PyErr_SetString(PyExc_TypeError, "wrong input object was given");
-            return NULL;
-        }
-
-        read = PyEval_CallObject(reader, NULL);
-        Py_DECREF(reader);
-        if (read) {
-            input = read;
-        } else {
-            return NULL;
-        }
+    if (PyQR_AddData(self, (const qr_byte_t *)data, (int)data_len, mode)) {
+        Py_RETURN_NONE;
     }
 
-#ifdef PyBytes_Check
-    if (PyBytes_Check(input)) {
-        PyBytes_AsStringAndSize(input, &data, &data_len);
-    }
-#else
-    if (PyString_Check(input)) {
-        PyString_AsStringAndSize(input, &data, &data_len);
-    }
-#endif
-#ifdef PyUnicode_Check
-    else if (PyUnicode_Check(input)) {
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
-        data = PyUnicode_AsUTF8AndSize(input, &data_len);
-#else
-        utf8 = PyUnicode_AsUTF8String(input);
-        if (utf8) {
-#if PY_MAJOR_VERSION >= 3
-            PyBytes_AsStringAndSize(utf8, &data, &data_len);
-#else
-            PyString_AsStringAndSize(utf8, &data, &data_len);
-#endif
-        }
-#endif
-    }
-#endif
-#ifdef PyByteArray_Check
-    else if (PyByteArray_Check(input)) {
-        data = PyByteArray_AsString(input);
-        data_len = PyByteArray_Size(input);
-    }
-#endif
-    else {
-        PyErr_SetString(PyExc_TypeError, "wrong input object was given");
-    }
-
-    if (!PyErr_Occurred()) {
-        if (PyQR_AddData(self, (const qr_byte_t *)data, (int)data_len, mode)) {
-            result = Py_None;
-            Py_INCREF(result);
-        }
-    }
-
-    Py_XDECREF(read);
-    Py_XDECREF(utf8);
-    return result;
+    return NULL;
 }
 
 /* }}} */
@@ -492,50 +416,6 @@ QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
     }
 
     return PyQR_GetSymbol_FromObject(self, format, separator, magnify, order);
-}
-
-/* }}} */
-/* {{{ QRCode_output_symbol() */
-
-static PyObject *
-QRCode_output_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
-{
-    static char *kwlist[] = {
-        "output", "format", "separator", "magnify", "order", NULL
-    };
-
-    PyObject *output = NULL;
-    int format = self->format;
-    int magnify = self->magnify;
-    int separator = self->separator;
-    int order = self->order;
-
-    PyObject *symbol;
-
-    activeFuncName = fn_output_symbol;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "|Oiiii:QRCode.output_symbol", kwlist,
-                                     &output,
-                                     &format, &separator, &magnify, &order)
-    ) {
-        return NULL;
-    }
-
-    symbol = PyQR_GetSymbol_FromObject(self, format, separator, magnify, order);
-    if (symbol == NULL) {
-        return NULL;
-    }
-
-    if (output == NULL) {
-        PyObject_Print(symbol, stdout, Py_PRINT_RAW);
-    }
-    else {
-        PyFile_WriteObject(symbol, output, Py_PRINT_RAW);
-    }
-
-    Py_DECREF(symbol);
-    Py_RETURN_NONE;
 }
 
 /* }}} */

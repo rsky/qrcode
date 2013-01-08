@@ -77,9 +77,6 @@ static PyObject *
 QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds);
 
 static PyObject *
-QRCode_output_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds);
-
-static PyObject *
 QRCode_get_info(QRCodeObject *self, PyObject *unused);
 
 /* }}} */
@@ -141,30 +138,6 @@ PyQR_ActiveFuncName(void);
 typedef int Py_ssize_t;
 #endif
 #endif
-
-static inline int PyQR_CheckString(PyObject *obj)
-{
-#ifdef PyBytes_Check
-    if (PyBytes_Check(obj)) {
-        return 1;
-    }
-#else
-    if (PyString_Check(obj)) {
-        return 1;
-    }
-#endif
-#ifdef PyUnicode_Check
-    if (PyUnicode_Check(obj)) {
-        return 1;
-    }
-#endif
-#ifdef PyByteArray_Check
-    if (PyByteArray_Check(obj)) {
-        return 1;
-    }
-#endif
-    return 0;
-}
 
 static inline int PyQR_IsTextFormat(int format)
 {
