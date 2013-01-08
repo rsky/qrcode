@@ -94,7 +94,7 @@ PyDoc_STRVAR(extension__doc__,
 "extension(format[, include_dot]) -- Return a filename extension\n"
 "which corresponds to the given output format.\n"
 "\n"
-"If optional arg include_dot is zero, the result will not\n"
+"If optional arg include_dot is False, the result will not\n"
 "include leading dot.");
 
 PyDoc_STRVAR(QRCode_class__doc__, "QR Code generator class.");
@@ -462,11 +462,19 @@ _qr_process(const qr_byte_t *data, int data_len, FILE *out,
         }
     }
     else {
-        qr_byte_t *symbol = NULL;
-
-        symbol = _qr_get_symbol(qr, format, separator, magnify, &size);
+        char *symbol = (char *)_qr_get_symbol(qr, format, separator,
+                                              magnify, &size);
         if (symbol) {
-            result = Py_BuildValue("s#", (char *)symbol, size);
+#if PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 6
+            result = Py_BuildValue("s#", symbol, size);
+#else
+            if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
+                result = Py_BuildValue("s#", symbol, size);
+            }
+            else {
+                result = PyByteArray_FromStringAndSize(symbol, size);
+            }
+#endif
             free(symbol);
         }
     }
@@ -572,11 +580,19 @@ _qrs_process(const qr_byte_t *data, int data_len, FILE *out,
         }
     }
     else {
-        qr_byte_t *symbol = NULL;
-
-        symbol = _qrs_get_symbols(st, format, separator, magnify, order, &size);
+        char *symbol = (char *)_qrs_get_symbols(st, format, separator,
+                                                magnify, order, &size);
         if (symbol) {
-            result = Py_BuildValue("s#", (char *)symbol, size);
+#if PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 6
+            result = Py_BuildValue("s#", symbol, size);
+#else
+            if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
+                result = Py_BuildValue("s#", symbol, size);
+            }
+            else {
+                result = PyByteArray_FromStringAndSize(symbol, size);
+            }
+#endif
             free(symbol);
         }
     }
@@ -770,8 +786,8 @@ QRCode_init(QRCodeObject *self, PyObject *args, PyObject *kwds)
                                      &version, &mode, &eclevel,
                                      &masktype, &maxnum,
                                      &self->format, &self->magnify,
-                                     &self->separator, &self->order))
-    {
+                                     &self->separator, &self->order)
+    ) {
         return -1;
     }
 
