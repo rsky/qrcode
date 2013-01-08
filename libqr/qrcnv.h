@@ -87,10 +87,10 @@
 
 #define QRCNV_GET_SIZE() { \
 	if (sep != -1 && (sep < 0 || mag > QR_SEP_MAX)) { \
-		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_SEP, "%d", sep); \
+		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_SEP, ": %d", sep); \
 	} \
 	if (mag <= 0 || mag > QR_MAG_MAX) { \
-		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_MAG, "%d", mag); \
+		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_MAG, ": %d", mag); \
 	} \
 	dim = qr_vertable[qr->param.version].dimension; \
 	if (sep == -1) { \
@@ -112,10 +112,10 @@
 
 #define QRCNV_SA_GET_SIZE() { \
 	if (sep != -1 && (sep < 0 || mag > QR_SEP_MAX)) { \
-		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_SEP, "%d", sep); \
+		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_SEP, ": %d", sep); \
 	} \
 	if (mag <= 0 || mag > QR_MAG_MAX) { \
-		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_MAG, "%d", mag); \
+		QRCNV_RETURN_FAILURE3(QR_ERR_INVALID_MAG, ": %d", mag); \
 	} \
 	dim = qr_vertable[st->param.version].dimension; \
 	if (sep == -1) { \
