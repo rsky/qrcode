@@ -110,23 +110,23 @@ static PyMethodDef qr_methods[] = {
 
 static PyMethodDef QRCode_methods[] = {
     { "add_data", (PyCFunction)QRCode_add_data,
-        METH_CLASS | METH_KEYWORDS, NULL },
+        METH_KEYWORDS, NULL },
     { "read_data", (PyCFunction)QRCode_read_data,
-        METH_CLASS | METH_KEYWORDS, NULL },
+        METH_KEYWORDS, NULL },
     { "copy", (PyCFunction)QRCode_copy,
-        METH_CLASS | METH_NOARGS, NULL },
+        METH_NOARGS, NULL },
     { "finalize", (PyCFunction)QRCode_finalize,
-        METH_CLASS | METH_NOARGS, NULL },
+        METH_NOARGS, NULL },
     { "is_finalized", (PyCFunction)QRCode_is_finalized,
-        METH_CLASS | METH_NOARGS, NULL },
+        METH_NOARGS, NULL },
     { "has_data", (PyCFunction)QRCode_has_data,
-        METH_CLASS | METH_NOARGS, NULL },
+        METH_NOARGS, NULL },
     { "get_symbol", (PyCFunction)QRCode_get_symbol,
-        METH_CLASS | METH_KEYWORDS, NULL },
+        METH_KEYWORDS, NULL },
     { "output_symbol", (PyCFunction)QRCode_output_symbol,
-        METH_CLASS | METH_KEYWORDS, NULL },
+        METH_KEYWORDS, NULL },
     { "get_info", (PyCFunction)QRCode_get_info,
-        METH_CLASS | METH_NOARGS, NULL },
+        METH_NOARGS, NULL },
     { NULL, NULL, 0, NULL }
 };
 
