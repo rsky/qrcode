@@ -433,7 +433,7 @@ qrGetErrorInfo(QRCode *qr)
 /*
  * 構造的連接の最後のQRコードオブジェクトに登録されているエラー番号を返す
  */
-QR_API int 
+QR_API int
 qrsGetErrorCode(QRStructured *st)
 {
 	return st->cur->errcode;
@@ -568,7 +568,7 @@ qrStrError(int errcode)
 /*
  * libqrのエラー番号からエラー情報を設定する
  */
-QR_API void 
+QR_API void
 qrSetErrorInfo(QRCode *qr, int errnum, const char *param)
 {
 	qr->errcode = errnum;
@@ -582,7 +582,7 @@ qrSetErrorInfo(QRCode *qr, int errnum, const char *param)
 /*
  * システム標準のエラー番号からエラー情報を設定する
  */
-QR_API void 
+QR_API void
 qrSetErrorInfo2(QRCode *qr, int errnum, const char *param)
 {
 	char *info;
@@ -606,7 +606,7 @@ qrSetErrorInfo2(QRCode *qr, int errnum, const char *param)
 /*
  * libqrのエラー番号と可変長パラメータからエラー情報を設定する
  */
-QR_API void 
+QR_API void
 qrSetErrorInfo3(QRCode *qr, int errnum, const char *fmt, ...)
 {
 	char info[QR_ERR_MAX];
@@ -622,7 +622,7 @@ qrSetErrorInfo3(QRCode *qr, int errnum, const char *fmt, ...)
 /*
  * 最適な符号化方法を調べる
  */
-QR_API int 
+QR_API int
 qrDetectDataType(const qr_byte_t *source, int size)
 {
 	if (qrStrPosNotNumeric(source, size) == -1) {
@@ -640,7 +640,7 @@ qrDetectDataType(const qr_byte_t *source, int size)
 /*
  * 数字以外のデータが現れる位置を調べる
  */
-QR_API int 
+QR_API int
 qrStrPosNotNumeric(const qr_byte_t *source, int size)
 {
 	int p = 0;
@@ -657,7 +657,7 @@ qrStrPosNotNumeric(const qr_byte_t *source, int size)
 /*
  * 英数字以外のデータが現れる位置を調べる
  */
-QR_API int 
+QR_API int
 qrStrPosNotAlnum(const qr_byte_t *source, int size)
 {
 	int p = 0;
@@ -674,7 +674,7 @@ qrStrPosNotAlnum(const qr_byte_t *source, int size)
 /*
  * JIS X 0208漢字以外のデータが現れる位置を調べる
  */
-QR_API int 
+QR_API int
 qrStrPosNotKanji(const qr_byte_t *source, int size)
 {
 	qr_byte_t x, y;
@@ -711,7 +711,7 @@ qrStrPosNotKanji(const qr_byte_t *source, int size)
 /*
  * 英数字もしくはJIS X 0208漢字のデータが現れる位置を調べる
  */
-QR_API int 
+QR_API int
 qrStrPosNot8bit(const qr_byte_t *source, int size)
 {
 	qr_byte_t x, y;
@@ -740,7 +740,7 @@ qrStrPosNot8bit(const qr_byte_t *source, int size)
 /*
  * デフォルトの符号化モードでsizeバイト符号化したときのビット長を返す
  */
-QR_API int 
+QR_API int
 qrGetEncodedLength(QRCode *qr, int size)
 {
 	return qrGetEncodedLength2(qr, size, qr->param.mode);
@@ -749,7 +749,7 @@ qrGetEncodedLength(QRCode *qr, int size)
 /*
  * 特定の符号化モードでsizeバイト符号化したときのビット長を返す
  */
-QR_API int 
+QR_API int
 qrGetEncodedLength2(QRCode *qr, int size, int mode)
 {
 	int n, v;
@@ -812,7 +812,7 @@ qrGetEncodedLength2(QRCode *qr, int size, int mode)
 /*
  * デフォルトの符号化モードでsizeビットを上限として符号化可能な最大のバイト長を返す
  */
-QR_API int 
+QR_API int
 qrGetEncodableLength(QRCode *qr, int size)
 {
 	return qrGetEncodableLength2(qr, size, qr->param.mode);
@@ -821,7 +821,7 @@ qrGetEncodableLength(QRCode *qr, int size)
 /*
  * 特定の符号化モードでsizeビットを上限として符号化可能な最大のバイト長を返す
  */
-QR_API int 
+QR_API int
 qrGetEncodableLength2(QRCode *qr, int size, int mode)
 {
 	int l, m, n, v;
@@ -886,7 +886,7 @@ qrGetEncodableLength2(QRCode *qr, int size, int mode)
 /*
  * データを追加する
  */
-QR_API int 
+QR_API int
 qrAddData(QRCode *qr, const qr_byte_t *source, int size)
 {
 	if (qr->state == QR_STATE_FINAL) {
@@ -899,7 +899,7 @@ qrAddData(QRCode *qr, const qr_byte_t *source, int size)
 /*
  * 符号化モードを指定してデータを追加する
  */
-QR_API int 
+QR_API int
 qrAddData2(QRCode *qr, const qr_byte_t *source, int size, int mode)
 {
 	int enclen, maxlen;
@@ -952,7 +952,7 @@ qrAddData2(QRCode *qr, const qr_byte_t *source, int size, int mode)
 	 */
 	if (qr->param.version != -1) {
 		qr->enclen += enclen;
-		if (qr->state == QR_STATE_BEGIN) {
+		if (!qrHasData(qr)) {
 			qrInitDataWord(qr);
 		}
 		if (qrEncodeDataWord(qr, source, size, mode) == TRUE) {
@@ -1019,7 +1019,7 @@ qrAddData2(QRCode *qr, const qr_byte_t *source, int size, int mode)
 /*
  * 構造的連接の最後のQRコードオブジェクトにデータを追加する
  */
-QR_API int 
+QR_API int
 qrsAddData(QRStructured *st, const qr_byte_t *source, int size)
 {
 	if (st->state == QR_STATE_FINAL) {
@@ -1032,7 +1032,7 @@ qrsAddData(QRStructured *st, const qr_byte_t *source, int size)
 /*
  * 構造的連接の最後のQRコードオブジェクトに符号化モードを指定してデータを追加する
  */
-QR_API int 
+QR_API int
 qrsAddData2(QRStructured *st, const qr_byte_t *source, int size, int mode)
 {
 	int enclen, maxlen, limit, remain;
@@ -1062,7 +1062,7 @@ qrsAddData2(QRStructured *st, const qr_byte_t *source, int size, int mode)
 	 */
 	maxlen = 8 * qr_vertable[st->param.version].ecl[st->param.eclevel].datawords;
 	limit = maxlen - QR_STA_LEN;
-	if (st->cur->state == QR_STATE_BEGIN) {
+	if (!qrHasData(st->cur)) {
 		remain = limit;
 	} else {
 		remain = qrRemainedDataBits(st->cur);
@@ -1120,7 +1120,7 @@ qrsAddData2(QRStructured *st, const qr_byte_t *source, int size, int mode)
 		if (sizes[i] == 0 && i != 0) {
 			break;
 		}
-		if (st->cur->state == QR_STATE_BEGIN) {
+		if (!qrHasData(st->cur)) {
 			/*
 			 * データコード語を初期化し、仮の構造的連接ヘッダを追加する
 			 */
@@ -1171,7 +1171,7 @@ qrsAddData2(QRStructured *st, const qr_byte_t *source, int size, int mode)
 /*
  * データコード語を初期化する
  */
-static int 
+static int
 qrInitDataWord(QRCode *qr)
 {
 	/*
@@ -1191,7 +1191,7 @@ qrInitDataWord(QRCode *qr)
 /*
  * データコード語をエンコードする
  */
-static int 
+static int
 qrEncodeDataWord(QRCode *qr, const qr_byte_t *source, int size, int mode)
 {
 	int p = 0;
@@ -1379,7 +1379,7 @@ qrEncodeDataWord(QRCode *qr, const qr_byte_t *source, int size, int mode)
 /*
  * データコード語の余りを埋める
  */
-static int 
+static int
 qrFinalizeDataWord(QRCode *qr)
 {
 	int n, m;
@@ -1426,7 +1426,7 @@ qrFinalizeDataWord(QRCode *qr)
 /*
  * データコード語にビット列を追加する
  */
-static void 
+static void
 qrAddDataBits(QRCode *qr, int n, int word)
 {
 	/*
@@ -1450,7 +1450,7 @@ qrAddDataBits(QRCode *qr, int n, int word)
 /*
  * データコード語の残りビット数を返す
  */
-QR_API int 
+QR_API int
 qrRemainedDataBits(QRCode *qr)
 {
 	int version;
@@ -1461,7 +1461,7 @@ qrRemainedDataBits(QRCode *qr)
 /*
  * RSブロックごとに誤り訂正コード語を計算する
  */
-static int 
+static int
 qrComputeECWord(QRCode *qr)
 {
 	int i, j, k, m;
@@ -1576,7 +1576,7 @@ qrComputeECWord(QRCode *qr)
 /*
  * データコード語と誤り訂正コード語から最終的なコード語を作る
  */
-static int 
+static int
 qrMakeCodeWord(QRCode *qr)
 {
 	int i, j, k, cwtop, pos;
@@ -1665,7 +1665,7 @@ qrMakeCodeWord(QRCode *qr)
 /*
  * シンボルを初期化し、機能パターンを配置する
  */
-static int 
+static int
 qrFillFunctionPattern(QRCode *qr)
 {
 	int i, j, n, dim, xpos, ypos;
@@ -1783,7 +1783,7 @@ qrFillFunctionPattern(QRCode *qr)
 /*
  * シンボルに符号化されたコード語を配置する
  */
-static int 
+static int
 qrFillCodeWord(QRCode *qr)
 {
 	int i, j;
@@ -1819,7 +1819,7 @@ qrFillCodeWord(QRCode *qr)
 /*
  * モジュール配置の初期位置と配置方向を決める
  */
-static void 
+static void
 qrInitPosition(QRCode *qr)
 {
 	/*
@@ -1836,7 +1836,7 @@ qrInitPosition(QRCode *qr)
 /*
  * 次のモジュール配置位置を決める
  */
-static void 
+static void
 qrNextPosition(QRCode *qr)
 {
 	do {
@@ -1876,7 +1876,7 @@ qrNextPosition(QRCode *qr)
 /*
  * シンボルを最適なマスクパターンでマスクする
  */
-static int 
+static int
 qrSelectMaskPattern(QRCode *qr)
 {
 	int type;
@@ -1916,7 +1916,7 @@ qrSelectMaskPattern(QRCode *qr)
 /*
  * 設定済みの参照子のマスクパターンでシンボルをマスクする
  */
-static int 
+static int
 qrApplyMaskPattern(QRCode *qr)
 {
 	return qrApplyMaskPattern2(qr, qr->param.masktype);
@@ -1925,7 +1925,7 @@ qrApplyMaskPattern(QRCode *qr)
 /*
  * 指定した参照子のマスクパターンでシンボルをマスクする
  */
-static int 
+static int
 qrApplyMaskPattern2(QRCode *qr, int type)
 {
 
@@ -1995,7 +1995,7 @@ qrApplyMaskPattern2(QRCode *qr, int type)
 /*
  * マスクパターンを評価し評価値を返す
  */
-static long 
+static long
 qrEvaluateMaskPattern(QRCode *qr)
 {
 	int i, j, m, n, dim;
@@ -2174,7 +2174,7 @@ qrEvaluateMaskPattern(QRCode *qr)
 /*
  * シンボルに形式情報と型番情報を配置する
  */
-static int 
+static int
 qrFillFormatInfo(QRCode *qr)
 {
 	int i, j, dim, fmt, modulo, xpos, ypos;
@@ -2244,7 +2244,7 @@ qrFillFormatInfo(QRCode *qr)
  * シンボルに形式情報と型番情報を配置する処理までを
  * 一括で実行する
  */
-QR_API int 
+QR_API int
 qrFinalize(QRCode *qr)
 {
 	static qr_funcs funcs[] = {
@@ -2260,10 +2260,10 @@ qrFinalize(QRCode *qr)
 	int i = 0;
 	int ret = TRUE;
 
-	if (qr->state == QR_STATE_BEGIN) {
+	if (!qrHasData(qr)) {
 		qrSetErrorInfo(qr, QR_ERR_STATE, _QR_FUNCTION);
 		return FALSE;
-	} else if (qr->state == QR_STATE_FINAL) {
+	} else if (qrIsFinalized(qr)) {
 		return TRUE;
 	}
 
@@ -2337,18 +2337,41 @@ qrFinalize(QRCode *qr)
 }
 
 /*
+ * Finalze済か判定する
+ */
+QR_API int
+qrIsFinalized(const QRCode *qr)
+{
+	if (qr->state == QR_STATE_FINAL) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/*
+ * データをセット済か判定する
+ */
+QR_API int qrHasData(const QRCode *qr)
+{
+	if (qr->state == QR_STATE_BEGIN) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+/*
  * 構造的連接の最後のQRコードオブジェクトの
  * 仮構造的連接ヘッダを正しい情報で上書きし、Finalizeする
  */
-QR_API int 
+QR_API int
 qrsFinalize(QRStructured *st)
 {
 	int m, n, r;
 
-	if (st->state == QR_STATE_BEGIN) {
+	if (!qrsHasData(st)) {
 		qrSetErrorInfo(st->cur, QR_ERR_STATE, _QR_FUNCTION);
 		return FALSE;
-	} else if (st->state == QR_STATE_FINAL) {
+	} else if (qrsIsFinalized(st)) {
 		return TRUE;
 	}
 
@@ -2375,6 +2398,29 @@ qrsFinalize(QRStructured *st)
 		st->state = QR_STATE_FINAL;
 	}
 	return r;
+}
+
+/*
+ * Finalze済か判定する
+ */
+QR_API int
+qrsIsFinalized(const QRStructured *st)
+{
+	if (st->state == QR_STATE_FINAL) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/*
+ * データをセット済か判定する
+ */
+QR_API int qrsHasData(const QRStructured *st)
+{
+	if (st->state == QR_STATE_BEGIN) {
+		return FALSE;
+	}
+	return TRUE;
 }
 
 /*
@@ -2429,7 +2475,7 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 /*
  * 生成されたQRコードシンボルをストリーム fp に書き込む
  */
-QR_API int 
+QR_API int
 qrOutputSymbol(QRCode *qr, FILE *fp, int fmt, int sep, int mag)
 {
 	qr_byte_t *buf;
@@ -2463,7 +2509,7 @@ qrOutputSymbol(QRCode *qr, FILE *fp, int fmt, int sep, int mag)
 /*
  * 生成されたQRコードシンボルをファイル pathname に書き込む
  */
-QR_API int 
+QR_API int
 qrOutputSymbol2(QRCode *qr, const char *pathname, int fmt, int sep, int mag)
 {
 	FILE *fp;
@@ -2537,9 +2583,9 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 }
 
 /*
- * 生成されたQRコードシンボルすべてをストリーム fd に書き込む
+ * 生成されたQRコードシンボルすべてをストリーム fp に書き込む
  */
-QR_API int 
+QR_API int
 qrsOutputSymbols(QRStructured *st, FILE *fp, int fmt, int sep, int mag, int order)
 {
 	qr_byte_t *buf;
@@ -2574,7 +2620,7 @@ qrsOutputSymbols(QRStructured *st, FILE *fp, int fmt, int sep, int mag, int orde
 /*
  * 生成されたQRコードシンボルすべてをファイル pathname に書き込む
  */
-QR_API int 
+QR_API int
 qrsOutputSymbols2(QRStructured *st, const char *pathname, int fmt, int sep, int mag, int order)
 {
 	FILE *fp;

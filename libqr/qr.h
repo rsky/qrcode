@@ -285,6 +285,8 @@ QR_API char *qrGetErrorInfo(QRCode *qr);
 QR_API int qrAddData(QRCode *qr, const qr_byte_t *source, int size);
 QR_API int qrAddData2(QRCode *qr, const qr_byte_t *source, int size, int mode);
 QR_API int qrFinalize(QRCode *qr);
+QR_API int qrIsFinalized(const QRCode *qr);
+QR_API int qrHasData(const QRCode *qr);
 QR_API QRCode *qrClone(const QRCode *qr, int *errcode);
 
 /*
@@ -297,6 +299,8 @@ QR_API char *qrsGetErrorInfo(QRStructured *st);
 QR_API int qrsAddData(QRStructured *st, const qr_byte_t *source, int size);
 QR_API int qrsAddData2(QRStructured *st, const qr_byte_t *source, int size, int mode);
 QR_API int qrsFinalize(QRStructured *st);
+QR_API int qrsIsFinalized(const QRStructured *st);
+QR_API int qrsHasData(const QRStructured *st);
 QR_API QRStructured *qrsClone(const QRStructured *st, int *errcode);
 
 /*
