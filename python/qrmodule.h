@@ -64,7 +64,7 @@ QRCode_add_data(QRCodeObject *self, PyObject *args, PyObject *kwds);
 static PyObject *
 QRCode_read_data(QRCodeObject *self, PyObject *args, PyObject *kwds);
 
-static PyObject *
+static QRCodeObject *
 QRCode_copy(QRCodeObject *self, PyObject *unused);
 
 static PyObject *
@@ -83,35 +83,37 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused);
 /* {{{ internal function prototypes */
 
 static PyObject *
-_qr_process(const qr_byte_t *data, int data_len,
-            int version, int mode, int eclevel, int masktype,
-            int format, int magnify, int separator);
+PyQR_Process(const qr_byte_t *data, int data_len,
+             int version, int mode, int eclevel, int masktype,
+             int format, int magnify, int separator);
 
 static PyObject *
-_qrs_process(const qr_byte_t *data, int data_len,
-             int version, int mode, int eclevel, int masktype, int maxnum,
-             int format, int magnify, int separator, int order);
+PyQR_ProcessMulti(const qr_byte_t *data, int data_len,
+                  int version, int mode, int eclevel, int masktype, int maxnum,
+                  int format, int magnify, int separator, int order);
 
 static QRCode *
-_qr_create_simple(const qr_byte_t *data, int data_len,
-                  int version, int mode, int eclevel, int masktype);
+PyQR_Create(const qr_byte_t *data, int data_len,
+            int version, int mode, int eclevel, int masktype);
 
 static QRStructured *
-_qrs_create_simple(const qr_byte_t *data, int data_len,
-                   int version, int mode, int eclevel,
-                   int masktype, int maxnum);
+PyQR_CreateMulti(const qr_byte_t *data, int data_len,
+                 int version, int mode, int eclevel, int masktype, int maxnum);
 
 static qr_byte_t *
-_qr_get_symbol(QRCode *qr,
+PyQR_GetSymbol(QRCode *qr,
                int format, int separator, int magnify, int *symbol_size);
 
 static qr_byte_t *
-_qrs_get_symbols(QRStructured * st,
-                 int format, int separator, int magnify,
-                 int order, int *symbol_size);
+PyQR_GetSymbols(QRStructured * st,
+                int format, int separator, int magnify,
+                int order, int *symbol_size);
 
 static void
-_qr_set_get_error(int errcode, const char *errmsg);
+PyQR_SetError(int errcode, const char *errmsg);
+
+static PyTypeObject *
+PyQR_TypeObject(void);
 
 /* }}} */
 /* {{{ compatibility macros and inline functions */
