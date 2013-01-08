@@ -22,6 +22,8 @@
 #define qrIsData(qr, i, j)  (((qr)->symbol[i][j] & QR_MM_DATA) != 0)
 #define qrIsFunc(qr, i, j)  (((qr)->symbol[i][j] & QR_MM_FUNC) != 0)
 
+QR_API const char *(*qrGetCurrentFunctionName)(void) = NULL;
+
 /*
  * ライブラリのバージョンを返す
  */

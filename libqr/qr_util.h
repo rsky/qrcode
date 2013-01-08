@@ -34,12 +34,13 @@ extern "C" {
 /*
  * Current function name macro.
  */
+QR_API extern const char *(*qrGetCurrentFunctionName)(void);
 #if defined(__FUNCTION__)
-#define _QR_FUNCTION __FUNCTION__
+#define _QR_FUNCTION ((qrGetCurrentFunctionName) ? qrGetCurrentFunctionName() : __FUNCTION__)
 #elif defined(__func__)
-#define _QR_FUNCTION __func__
+#define _QR_FUNCTION ((qrGetCurrentFunctionName) ? qrGetCurrentFunctionName() : __func__)
 #else
-#define _QR_FUNCTION "?"
+#define _QR_FUNCTION ((qrGetCurrentFunctionName) ? qrGetCurrentFunctionName() : "?")
 #endif
 
 /*
