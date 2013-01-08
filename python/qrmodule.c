@@ -33,8 +33,6 @@
 
 /* {{{ type object declarations */
 
-staticforward PyTypeObject QRCodeObjectType;
-
 struct _QRCodeObject {
     PyObject_HEAD
     QRCode *qr;
@@ -135,92 +133,6 @@ static PyMemberDef QRCode_members[] = {
     { "order",     T_INT, offsetof(QRCodeObject, format),    0, "order" },
     { NULL, 0, 0, 0, NULL }
 };
-
-/* }}} */
-/* {{{ initialize a module */
-
-#define QR_DECLARE_CONSTANT(name) { \
-    v = PyInt_FromLong(QR_##name); \
-    PyDict_SetItemString(d, #name, v); \
-    Py_DECREF(v); \
-}
-
-#define QR_DECLARE_CONSTANT_EX(name, value) { \
-    v = PyInt_FromLong(value); \
-    PyDict_SetItemString(d, #name, v); \
-    Py_DECREF(v); \
-}
-
-PyMODINIT_FUNC initqr(void)
-{
-    PyObject *m, *d, *v;
-
-    QRCodeObjectType.ob_type = &PyType_Type;
-    if (PyType_Ready(&QRCodeObjectType) < 0) {
-        return;
-    }
-
-    m = Py_InitModule4("qr", qr_methods,
-                       qr_module__doc__,
-                       NULL, PYTHON_API_VERSION);
-    d = PyModule_GetDict(m);
-
-    /* encoding mode (fullname) */
-    QR_DECLARE_CONSTANT(EM_AUTO);
-    QR_DECLARE_CONSTANT(EM_NUMERIC);
-    QR_DECLARE_CONSTANT(EM_ALNUM);
-    QR_DECLARE_CONSTANT(EM_8BIT);
-    QR_DECLARE_CONSTANT(EM_KANJI);
-
-    /* encoding mode (alias) */
-    QR_DECLARE_CONSTANT_EX(MN, QR_EM_NUMERIC);
-    QR_DECLARE_CONSTANT_EX(MA, QR_EM_ALNUM);
-    QR_DECLARE_CONSTANT_EX(M8, QR_EM_8BIT);
-    QR_DECLARE_CONSTANT_EX(MK, QR_EM_KANJI);
-
-    /* error correction level (fullname) */
-    QR_DECLARE_CONSTANT(ECL_L);
-    QR_DECLARE_CONSTANT(ECL_M);
-    QR_DECLARE_CONSTANT(ECL_Q);
-    QR_DECLARE_CONSTANT(ECL_H);
-
-    /* output format (fullname) */
-    QR_DECLARE_CONSTANT(FMT_DIGIT);
-    QR_DECLARE_CONSTANT(FMT_ASCII);
-    QR_DECLARE_CONSTANT(FMT_JSON);
-    QR_DECLARE_CONSTANT(FMT_PBM);
-    QR_DECLARE_CONSTANT(FMT_BMP);
-    QR_DECLARE_CONSTANT(FMT_SVG);
-    QR_DECLARE_CONSTANT(FMT_TIFF);
-    QR_DECLARE_CONSTANT(FMT_GIF);
-    QR_DECLARE_CONSTANT(FMT_JPEG);
-    QR_DECLARE_CONSTANT(FMT_PNG);
-    QR_DECLARE_CONSTANT(FMT_WBMP);
-
-    /* output format (alias) */
-    QR_DECLARE_CONSTANT_EX(DIGIT, QR_FMT_DIGIT);
-    QR_DECLARE_CONSTANT_EX(ASCII, QR_FMT_ASCII);
-    QR_DECLARE_CONSTANT_EX(JSON,  QR_FMT_JSON);
-    QR_DECLARE_CONSTANT_EX(PBM,   QR_FMT_PBM);
-    QR_DECLARE_CONSTANT_EX(BMP,   QR_FMT_BMP);
-    QR_DECLARE_CONSTANT_EX(SVG,   QR_FMT_SVG);
-    QR_DECLARE_CONSTANT_EX(TIFF,  QR_FMT_TIFF);
-    QR_DECLARE_CONSTANT_EX(GIF,   QR_FMT_GIF);
-    QR_DECLARE_CONSTANT_EX(JPEG,  QR_FMT_JPEG);
-    QR_DECLARE_CONSTANT_EX(PNG,   QR_FMT_PNG);
-    QR_DECLARE_CONSTANT_EX(WBMP,  QR_FMT_WBMP);
-
-    /* add objects */
-    QRCodeError = PyErr_NewException("qr.Error", PyExc_RuntimeError, NULL);
-    Py_INCREF(QRCodeError);
-    PyModule_AddObject(m, "Error", QRCodeError);
-
-    Py_INCREF(&QRCodeObjectType);
-    PyModule_AddObject(m, "QRCode", (PyObject *)&QRCodeObjectType);
-}
-
-#undef QR_DECLARE_CONSTANT
-#undef QR_DECLARE_CONSTANT_EX
 
 /* }}} */
 /* {{{ qrcode() */
@@ -715,8 +627,12 @@ _qr_set_output_error(int errcode, const char *errmsg)
 /* {{{ type object entities */
 
 static PyTypeObject QRCodeObjectType = {
+#ifdef PyVarObject_HEAD_INIT
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
+#endif
     "qr.QRCode",                        /* tp_name */
     sizeof(QRCodeObject),               /* tp_basicsize */
     0,                                  /* tp_itemsize */ 
@@ -828,8 +744,126 @@ QRCode_dealloc(QRCodeObject *self)
     else if (self->qr) {
         qrDestroy(self->qr);
     }
-    self->ob_type->tp_free(self);
+    Py_TYPE(self)->tp_free(self);
 }
+
+/* }}} */
+/* {{{ initialize a module */
+
+#if PY_MAJOR_VERSION >= 3
+static PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "qr",                   /* m_name */
+    qr_module__doc__,       /* m_doc */
+    -1,                     /* m_size */
+    qr_methods,             /* m_methods */
+    NULL,                   /* m_reload */
+    NULL,                   /* m_traverse */
+    NULL,                   /* m_clear */
+    NULL,                   /* m_free */
+};
+
+#define PyInt_FromLong PyLong_FromLong
+#endif
+
+#define QR_DECLARE_CONSTANT(name) { \
+    v = PyInt_FromLong(QR_##name); \
+    PyDict_SetItemString(d, #name, v); \
+    Py_DECREF(v); \
+}
+
+#define QR_DECLARE_CONSTANT_EX(name, value) { \
+    v = PyInt_FromLong(value); \
+    PyDict_SetItemString(d, #name, v); \
+    Py_DECREF(v); \
+}
+
+static PyObject *
+moduleinit(void)
+{
+    PyObject *m, *d, *v;
+
+    Py_TYPE(&QRCodeObjectType) = &PyType_Type;
+    if (PyType_Ready(&QRCodeObjectType) < 0) {
+        return NULL;
+    }
+
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&moduledef);
+#else
+    m = Py_InitModule4("qr", qr_methods,
+                       qr_module__doc__,
+                       NULL, PYTHON_API_VERSION);
+#endif
+    d = PyModule_GetDict(m);
+
+    /* encoding mode (fullname) */
+    QR_DECLARE_CONSTANT(EM_AUTO);
+    QR_DECLARE_CONSTANT(EM_NUMERIC);
+    QR_DECLARE_CONSTANT(EM_ALNUM);
+    QR_DECLARE_CONSTANT(EM_8BIT);
+    QR_DECLARE_CONSTANT(EM_KANJI);
+
+    /* encoding mode (alias) */
+    QR_DECLARE_CONSTANT_EX(MN, QR_EM_NUMERIC);
+    QR_DECLARE_CONSTANT_EX(MA, QR_EM_ALNUM);
+    QR_DECLARE_CONSTANT_EX(M8, QR_EM_8BIT);
+    QR_DECLARE_CONSTANT_EX(MK, QR_EM_KANJI);
+
+    /* error correction level (fullname) */
+    QR_DECLARE_CONSTANT(ECL_L);
+    QR_DECLARE_CONSTANT(ECL_M);
+    QR_DECLARE_CONSTANT(ECL_Q);
+    QR_DECLARE_CONSTANT(ECL_H);
+
+    /* output format (fullname) */
+    QR_DECLARE_CONSTANT(FMT_DIGIT);
+    QR_DECLARE_CONSTANT(FMT_ASCII);
+    QR_DECLARE_CONSTANT(FMT_JSON);
+    QR_DECLARE_CONSTANT(FMT_PBM);
+    QR_DECLARE_CONSTANT(FMT_BMP);
+    QR_DECLARE_CONSTANT(FMT_SVG);
+    QR_DECLARE_CONSTANT(FMT_TIFF);
+    QR_DECLARE_CONSTANT(FMT_GIF);
+    QR_DECLARE_CONSTANT(FMT_JPEG);
+    QR_DECLARE_CONSTANT(FMT_PNG);
+    QR_DECLARE_CONSTANT(FMT_WBMP);
+
+    /* output format (alias) */
+    QR_DECLARE_CONSTANT_EX(DIGIT, QR_FMT_DIGIT);
+    QR_DECLARE_CONSTANT_EX(ASCII, QR_FMT_ASCII);
+    QR_DECLARE_CONSTANT_EX(JSON,  QR_FMT_JSON);
+    QR_DECLARE_CONSTANT_EX(PBM,   QR_FMT_PBM);
+    QR_DECLARE_CONSTANT_EX(BMP,   QR_FMT_BMP);
+    QR_DECLARE_CONSTANT_EX(SVG,   QR_FMT_SVG);
+    QR_DECLARE_CONSTANT_EX(TIFF,  QR_FMT_TIFF);
+    QR_DECLARE_CONSTANT_EX(GIF,   QR_FMT_GIF);
+    QR_DECLARE_CONSTANT_EX(JPEG,  QR_FMT_JPEG);
+    QR_DECLARE_CONSTANT_EX(PNG,   QR_FMT_PNG);
+    QR_DECLARE_CONSTANT_EX(WBMP,  QR_FMT_WBMP);
+
+    /* add objects */
+    QRCodeError = PyErr_NewException("qr.Error", PyExc_RuntimeError, NULL);
+    Py_INCREF(QRCodeError);
+    PyModule_AddObject(m, "Error", QRCodeError);
+
+    Py_INCREF(&QRCodeObjectType);
+    PyModule_AddObject(m, "QRCode", (PyObject *)&QRCodeObjectType);
+
+    return m;
+}
+
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit_qr(void)
+{
+    return moduleinit();
+}
+#else
+PyMODINIT_FUNC initqr(void)
+{
+    (void)moduleinit();
+}
+#endif
 
 /* }}} */
 

@@ -125,6 +125,29 @@ static void
 _qr_set_output_error(int errcode, const char *errmsg);
 
 /* }}} */
+/* {{{ compatibility macros and inline functions */
+
+#ifndef Py_TYPE
+#define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+
+extern PyTypeObject PyIOBase_Type;
+
+static inline int PyFile_Check(PyObject *obj)
+{
+    return PyObject_IsInstance(obj, (PyObject *)&PyIOBase_Type);
+}
+
+static inline FILE *PyFile_AsFile(PyObject *obj)
+{
+    return fdopen(PyObject_AsFileDescriptor(obj), "w");
+}
+
+#endif
+
+/* }}} */
 
 #endif /* __QRMODULE_H__ */
 
