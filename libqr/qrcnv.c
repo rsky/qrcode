@@ -167,7 +167,7 @@
 #else
 #define QRCNV_AA_UNIT 2
 #define qrWriteBLM_ASCII(m, n) { rptr += (n) * 2; }
-#define qrWriteDKM_ASCII(m, n) { repeat(m, n) { *rptr++ = '*'; *rptr++ = '*'; } }
+#define qrWriteDKM_ASCII(m, n) { repeat(m, n) { *rptr++ = 'X'; *rptr++ = 'X'; } }
 #endif
 
 /* }}} */
