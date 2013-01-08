@@ -121,6 +121,9 @@ PyQR_SetError(int errcode, const char *errmsg);
 static PyTypeObject *
 PyQR_TypeObject(void);
 
+static const char *
+PyQR_ActiveFuncName(void);
+
 /* }}} */
 /* {{{ compatibility macros and inline functions */
 

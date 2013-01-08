@@ -31,7 +31,7 @@
 #include "qr_util.h"
 #include <structmember.h>
 
-/* {{{ type object declarations */
+/* {{{ type definitions */
 
 struct _QRCodeObject {
     PyObject_HEAD
@@ -45,9 +45,19 @@ struct _QRCodeObject {
 };
 
 /* }}} */
-/* {{{ errors */
+/* {{{ globals */
 
 static PyObject *QRCodeError;
+
+static const char *activeFuncName;
+static const char * const fn_qrcode         = "qr.qrcode()";
+static const char * const fn_add_data       = "qr.QRCode.add_data()";
+static const char * const fn_read_data      = "qr.QRCode.read_data()";
+static const char * const fn_copy           = "qr.QRCode.copy()";
+static const char * const fn_finalize       = "qr.QRCode.finalize()";
+static const char * const fn_get_symbol     = "qr.QRCode.get_symbol()";
+static const char * const fn_output_symbol  = "qr.QRCode.output_symbol()";
+static const char * const fn_get_info       = "qr.QRCode.get_info()";
 
 /* }}} */
 /* {{{ pydoc */
@@ -185,6 +195,8 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
         }
     }
 
+    activeFuncName = fn_qrcode;
+
     if (maxnum == 1) {
         result = PyQR_Process((const qr_byte_t *)data, data_len,
                               version, mode, eclevel, masktype,
@@ -281,6 +293,9 @@ static PyObject *
 QRCode_add_data(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
+
+    activeFuncName = fn_add_data;
+
     return NULL;
 }
 
@@ -291,6 +306,9 @@ static PyObject *
 QRCode_read_data(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
+
+    activeFuncName = fn_read_data;
+
     return NULL;
 }
 
@@ -305,6 +323,8 @@ QRCode_copy(QRCodeObject *self, PyObject *unused)
     QRStructured *st = NULL;
     QRCodeObject *copy;
     PyObject *obj;
+
+    activeFuncName = fn_copy;
 
     if (self->qr) {
         qr = qrClone(self->qr, &errcode);
@@ -350,18 +370,23 @@ QRCode_copy(QRCodeObject *self, PyObject *unused)
 static PyObject *
 QRCode_finalize(QRCodeObject *self, PyObject *unused)
 {
+    activeFuncName = fn_finalize;
+
     if (self->qr) {
         if (qrFinalize(self->qr)) {
             Py_RETURN_TRUE;
         }
         PyErr_SetString(QRCodeError, qrGetErrorInfo(self->qr));
+        return NULL;
     }
     else if (self->st) {
         if (qrsFinalize(self->st)) {
             Py_RETURN_TRUE;
         }
         PyErr_SetString(QRCodeError, qrsGetErrorInfo(self->st));
+        return NULL;
     }
+
     Py_RETURN_FALSE;
 }
 
@@ -410,6 +435,9 @@ static PyObject *
 QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
+
+    activeFuncName = fn_get_symbol;
+
     return NULL;
 }
 
@@ -420,6 +448,9 @@ static PyObject *
 QRCode_output_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
+
+    activeFuncName = fn_output_symbol;
+
     return NULL;
 }
 
@@ -430,6 +461,9 @@ static PyObject *
 QRCode_get_info(QRCodeObject *self, PyObject *unused)
 {
     PyErr_SetString(PyExc_NotImplementedError, "not yet implemented");
+
+    activeFuncName = fn_get_info;
+
     return NULL;
 }
 
@@ -818,6 +852,8 @@ PyQR_InitModule(void)
 #endif
     d = PyModule_GetDict(m);
 
+    qrGetCurrentFunctionName = PyQR_ActiveFuncName;
+
     /* encoding mode (fullname) */
     QR_DECLARE_CONSTANT(EM_AUTO);
     QR_DECLARE_CONSTANT(EM_NUMERIC);
@@ -885,6 +921,15 @@ PyMODINIT_FUNC initqr(void)
     (void)PyQR_InitModule();
 }
 #endif
+
+/* }}} */
+/* {{{ PyQR_ActiveFuncName() */
+
+static const char *
+PyQR_ActiveFuncName(void)
+{
+    return activeFuncName;
+}
 
 /* }}} */
 
