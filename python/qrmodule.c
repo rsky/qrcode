@@ -152,7 +152,6 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
     PyObject *output = NULL;
     PyObject *writer = NULL;
     PyObject *result = NULL;
-    FILE *out = NULL;
 
     int version = -1;
     int mode = QR_EM_AUTO;
@@ -174,25 +173,16 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
     }
 
     if (output) {
-        if (PyFile_Check(output)) {
-            out = PyFile_AsFile(output);
-            if (out == NULL) {
-                PyErr_SetString(PyExc_ValueError, "output already closed");
-                return NULL;
-            }
-        }
-        else {
-            writer = PyObject_GetAttrString(output, "write");
-            if (writer == NULL) {
-                PyErr_SetString(PyExc_TypeError,
-                                "output must be a file object");
-                return NULL;
-            }
+        writer = PyObject_GetAttrString(output, "write");
+        if (writer == NULL) {
+            PyErr_SetString(PyExc_TypeError,
+                            "output must be a file object");
+            return NULL;
         }
     }
 
     if (maxnum == 1) {
-        result = _qr_process((const qr_byte_t *)data, data_len, out,
+        result = _qr_process((const qr_byte_t *)data, data_len,
                              version, mode, eclevel, masktype,
                              format, magnify, separator);
     }
@@ -200,12 +190,12 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
         if (version == -1) {
             version = 1;
         }
-        result = _qrs_process((const qr_byte_t *)data, data_len, out,
+        result = _qrs_process((const qr_byte_t *)data, data_len,
                               version, mode, eclevel, masktype, maxnum,
                               format, magnify, separator, order);
     }
 
-    if (result != NULL && writer != NULL) {
+    if (result && writer) {
         PyObject *write_args, *write_result;
 
         write_args = PyTuple_Pack(1, result);
@@ -221,7 +211,7 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
         }
     }
 
-    if (writer != NULL) {
+    if (writer) {
         Py_DECREF(writer);
     }
 
@@ -354,12 +344,13 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused)
 /* {{{ _qr_process() */
 
 static PyObject *
-_qr_process(const qr_byte_t *data, int data_len, FILE *out,
+_qr_process(const qr_byte_t *data, int data_len,
             int version, int mode, int eclevel, int masktype,
             int format, int magnify, int separator)
 {
     PyObject *result = NULL;
-    QRCode *qr = NULL;
+    QRCode *qr;
+    char *symbol;
     int size = 0;
 
     qr = _qr_create_simple(data, data_len, version, mode, eclevel, masktype);
@@ -367,28 +358,19 @@ _qr_process(const qr_byte_t *data, int data_len, FILE *out,
         return NULL;
     }
 
-    if (out) {
-        size = _qr_output_symbol(qr, out, format, separator, magnify);
-        if (size > 0) {
-            result = Py_BuildValue("i", size);
-        }
-    }
-    else {
-        char *symbol = (char *)_qr_get_symbol(qr, format, separator,
-                                              magnify, &size);
-        if (symbol) {
+    symbol = (char *)_qr_get_symbol(qr, format, separator, magnify, &size);
+    if (symbol) {
 #if PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 6
-            result = Py_BuildValue("s#", symbol, size);
+        result = Py_BuildValue("s#", symbol, size);
 #else
-            if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
-                result = Py_BuildValue("s#", symbol, size);
-            }
-            else {
-                result = PyByteArray_FromStringAndSize(symbol, size);
-            }
-#endif
-            free(symbol);
+        if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
+            result = Py_BuildValue("s#", symbol, size);
         }
+        else {
+            result = PyByteArray_FromStringAndSize(symbol, size);
+        }
+#endif
+        free(symbol);
     }
 
     qrDestroy(qr);
@@ -439,7 +421,7 @@ static qr_byte_t *
 _qr_get_symbol(QRCode *qr,
                int format, int separator, int magnify, int *symbol_size)
 {
-    qr_byte_t *symbol = NULL;
+    qr_byte_t *symbol;
 
     symbol = qrGetSymbol(qr, format, separator, magnify, symbol_size);
     if (symbol == NULL) {
@@ -451,62 +433,38 @@ _qr_get_symbol(QRCode *qr,
 }
 
 /* }}} */
-/* {{{ _qr_output_symbol() */
-
-static int
-_qr_output_symbol(QRCode *qr, FILE *out,
-                  int format, int separator, int magnify)
-{
-    int out_size = 0;
-
-    out_size = qrOutputSymbol(qr, out, format, separator, magnify);
-    if (out_size <= 0) {
-        _qr_set_output_error(qrGetErrorCode(qr), qrGetErrorInfo(qr));
-    }
-
-    return out_size;
-}
-
-/* }}} */
 /* {{{ _qrs_process() */
 
 static PyObject *
-_qrs_process(const qr_byte_t *data, int data_len, FILE *out,
+_qrs_process(const qr_byte_t *data, int data_len,
              int version, int mode, int eclevel, int masktype, int maxnum,
              int format, int magnify, int separator, int order)
 {
     PyObject *result = NULL;
-    QRStructured *st = NULL;
+    QRStructured *st;
+    char *symbol;
     int size = 0;
 
-    st = _qrs_create_simple((const qr_byte_t *)data, data_len,
-            version, mode, eclevel, masktype, maxnum);
+    st = _qrs_create_simple(data, data_len,
+                            version, mode, eclevel, masktype, maxnum);
     if (st == NULL) {
         return NULL;
     }
 
-    if (out) {
-        size = _qrs_output_symbols(st, out, format, separator, magnify, order);
-        if (size > 0) {
-            result = Py_BuildValue("i", size);
-        }
-    }
-    else {
-        char *symbol = (char *)_qrs_get_symbols(st, format, separator,
-                                                magnify, order, &size);
-        if (symbol) {
+    symbol = (char *)_qrs_get_symbols(st, format, separator,
+                                      magnify, order, &size);
+    if (symbol) {
 #if PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 6
-            result = Py_BuildValue("s#", symbol, size);
+        result = Py_BuildValue("s#", symbol, size);
 #else
-            if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
-                result = Py_BuildValue("s#", symbol, size);
-            }
-            else {
-                result = PyByteArray_FromStringAndSize(symbol, size);
-            }
-#endif
-            free(symbol);
+        if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
+            result = Py_BuildValue("s#", symbol, size);
         }
+        else {
+            result = PyByteArray_FromStringAndSize(symbol, size);
+        }
+#endif
+        free(symbol);
     }
 
     qrsDestroy(st);
@@ -521,7 +479,7 @@ static QRStructured *
 _qrs_create_simple(const qr_byte_t *data, int data_len,
                    int version, int mode, int eclevel, int masktype, int maxnum)
 {
-    QRStructured *st = NULL;
+    QRStructured *st;
     int errcode = QR_ERR_NONE;
 
     st = qrsInit(version, mode, eclevel, masktype, maxnum, &errcode);
@@ -558,7 +516,7 @@ _qrs_get_symbols(QRStructured * st,
                  int format, int separator, int magnify,
                  int order, int *symbol_size)
 {
-    qr_byte_t *symbol = NULL;
+    qr_byte_t *symbol;
 
     symbol = qrsGetSymbols(st, format, separator, magnify, order, symbol_size);
     if (symbol == NULL) {
@@ -567,23 +525,6 @@ _qrs_get_symbols(QRStructured * st,
     }
 
     return symbol;
-}
-
-/* }}} */
-/* {{{ _qrs_output_symbols() */
-
-static int
-_qrs_output_symbols(QRStructured * st, FILE *out,
-                    int format, int separator, int magnify, int order)
-{
-    int out_size = 0;
-
-    out_size = qrsOutputSymbols(st, out, format, separator, magnify, order);
-    if (out_size <= 0) {
-        _qr_set_output_error(qrsGetErrorCode(st), qrsGetErrorInfo(st));
-    }
-
-    return out_size;
 }
 
 /* }}} */
@@ -597,26 +538,6 @@ _qr_set_get_error(int errcode, const char *errmsg)
     }
     else if (errcode == QR_ERR_SEE_ERRNO) {
         PyErr_SetFromErrno(QRCodeError);
-    }
-    else {
-        PyErr_SetString(QRCodeError, errmsg);
-    }
-}
-
-/* }}} */
-/* {{{ _qr_set_output_error() */
-
-static void
-_qr_set_output_error(int errcode, const char *errmsg)
-{
-    if (errcode >= QR_ERR_INVALID_ARG && errcode <= QR_ERR_EMPTY_PARAM) {
-        PyErr_SetString(PyExc_ValueError, errmsg);
-    }
-    else if (errcode == QR_ERR_SEE_ERRNO) {
-        PyErr_SetFromErrno(PyExc_IOError);
-    }
-    else if (errcode == QR_ERR_FWRITE) {
-        PyErr_SetString(PyExc_IOError, errmsg);
     }
     else {
         PyErr_SetString(QRCodeError, errmsg);
@@ -762,18 +683,16 @@ static PyModuleDef moduledef = {
     NULL,                   /* m_clear */
     NULL,                   /* m_free */
 };
-
-#define PyInt_FromLong PyLong_FromLong
 #endif
 
 #define QR_DECLARE_CONSTANT(name) { \
-    v = PyInt_FromLong(QR_##name); \
+    v = PyLong_FromLong(QR_##name); \
     PyDict_SetItemString(d, #name, v); \
     Py_DECREF(v); \
 }
 
 #define QR_DECLARE_CONSTANT_EX(name, value) { \
-    v = PyInt_FromLong(value); \
+    v = PyLong_FromLong(value); \
     PyDict_SetItemString(d, #name, v); \
     Py_DECREF(v); \
 }

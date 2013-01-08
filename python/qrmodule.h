@@ -83,12 +83,12 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused);
 /* {{{ internal function prototypes */
 
 static PyObject *
-_qr_process(const qr_byte_t *data, int data_len, FILE *out,
+_qr_process(const qr_byte_t *data, int data_len,
             int version, int mode, int eclevel, int masktype,
             int format, int magnify, int separator);
 
 static PyObject *
-_qrs_process(const qr_byte_t *data, int data_len, FILE *out,
+_qrs_process(const qr_byte_t *data, int data_len,
              int version, int mode, int eclevel, int masktype, int maxnum,
              int format, int magnify, int separator, int order);
 
@@ -110,19 +110,8 @@ _qrs_get_symbols(QRStructured * st,
                  int format, int separator, int magnify,
                  int order, int *symbol_size);
 
-static int
-_qr_output_symbol(QRCode *qr, FILE *out,
-                  int format, int separator, int magnify);
-
-static int
-_qrs_output_symbols(QRStructured * st, FILE *out,
-                    int format, int separator, int magnify, int order);
-
 static void
 _qr_set_get_error(int errcode, const char *errmsg);
-
-static void
-_qr_set_output_error(int errcode, const char *errmsg);
 
 /* }}} */
 /* {{{ compatibility macros and inline functions */
@@ -131,20 +120,8 @@ _qr_set_output_error(int errcode, const char *errmsg);
 #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 #endif
 
-#if PY_MAJOR_VERSION >= 3
-
-extern PyTypeObject PyIOBase_Type;
-
-static inline int PyFile_Check(PyObject *obj)
-{
-    return PyObject_IsInstance(obj, (PyObject *)&PyIOBase_Type);
-}
-
-static inline FILE *PyFile_AsFile(PyObject *obj)
-{
-    return fdopen(PyObject_AsFileDescriptor(obj), "w");
-}
-
+#if PY_MAJOR_VERSION < 3
+#define PyLong_FromLong PyInt_FromLong
 #endif
 
 /* }}} */
