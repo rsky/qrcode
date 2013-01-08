@@ -61,9 +61,6 @@ QRCode_dealloc(QRCodeObject *self);
 static PyObject *
 QRCode_add_data(QRCodeObject *self, PyObject *args, PyObject *kwds);
 
-static PyObject *
-QRCode_read_data(QRCodeObject *self, PyObject *args, PyObject *kwds);
-
 static QRCodeObject *
 QRCode_copy(QRCodeObject *self, PyObject *unused);
 
@@ -111,9 +108,16 @@ PyQR_GetSymbol(QRCode *qr,
                int format, int separator, int magnify, int *symbol_size);
 
 static qr_byte_t *
-PyQR_GetSymbols(QRStructured * st,
+PyQR_GetSymbols(QRStructured *st,
                 int format, int separator, int magnify,
                 int order, int *symbol_size);
+
+static PyObject *
+PyQR_GetSymbol_FromObject(QRCodeObject *obj,
+                          int format, int separator, int magnify, int order);
+
+static int
+PyQR_AddData(QRCodeObject *obj, const qr_byte_t *data, int data_len, int mode);
 
 static void
 PyQR_SetError(int errcode, const char *errmsg);
@@ -125,7 +129,7 @@ static const char *
 PyQR_ActiveFuncName(void);
 
 /* }}} */
-/* {{{ compatibility macros and inline functions */
+/* {{{ macros and inline functions for compatibility and utility */
 
 #ifndef Py_TYPE
 #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
@@ -133,7 +137,42 @@ PyQR_ActiveFuncName(void);
 
 #if PY_MAJOR_VERSION < 3
 #define PyLong_FromLong PyInt_FromLong
+#if PY_MINOR_VERSION < 5
+typedef int Py_ssize_t;
 #endif
+#endif
+
+static inline int PyQR_CheckString(PyObject *obj)
+{
+#ifdef PyBytes_Check
+    if (PyBytes_Check(obj)) {
+        return 1;
+    }
+#else
+    if (PyString_Check(obj)) {
+        return 1;
+    }
+#endif
+#ifdef PyUnicode_Check
+    if (PyUnicode_Check(obj)) {
+        return 1;
+    }
+#endif
+#ifdef PyByteArray_Check
+    if (PyByteArray_Check(obj)) {
+        return 1;
+    }
+#endif
+    return 0;
+}
+
+static inline int PyQR_IsTextFormat(int format)
+{
+    if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
+        return 1;
+    }
+    return 0;
+}
 
 /* }}} */
 
