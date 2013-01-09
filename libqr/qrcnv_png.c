@@ -31,16 +31,6 @@
 /* size of the PNG IHDR data (4 + 4 + 1 + 1 + 1 + 1 + 1) */
 #define QRCNV_PNG_IHDR_DATA_SIZE 13
 
-#if 0
-/* size of the PNG PLTE chunk (4 + 4 + 6 + 4) */
-#define QRCNV_PNG_PLTE_SIZE 18
-
-/* size of the PNG PLTE data (3 * 2) */
-#define QRCNV_PNG_PLTE_DATA_SIZE 6
-#else
-#define QRCNV_PNG_PLTE_SIZE 0
-#endif
-
 /* size of the PNG IEND chunk (4 + 4 + 4) */
 #define QRCNV_PNG_IEND_SIZE 12
 
@@ -303,7 +293,7 @@ qrSymbolToPNG(QRCode *qr, int sep, int mag, int *size)
 	 * IDATチャンクの終了処理とIENDチャンクを書き込む
 	 */
 	QRCNV_PNG_REALLOC(4 + QRCNV_PNG_IEND_SIZE);
-	idat = wbuf + QRCNV_PNG_SIGNATURE_SIZE + QRCNV_PNG_IHDR_SIZE + QRCNV_PNG_PLTE_SIZE;
+	idat = wbuf + QRCNV_PNG_SIGNATURE_SIZE + QRCNV_PNG_IHDR_SIZE;
 	wptr = qrPngWriteEndIdat(wptr, idat, (int)(wptr - idat) - 8);
 	wptr = qrPngWriteIend(wptr);
 	*size = (int)(wptr - wbuf);
@@ -481,7 +471,7 @@ qrsSymbolsToPNG(QRStructured *st, int sep, int mag, int order, int *size)
 	 * IDATチャンクの終了処理とIENDチャンクを書き込む
 	 */
 	QRCNV_PNG_REALLOC(4 + QRCNV_PNG_IEND_SIZE);
-	idat = wbuf + QRCNV_PNG_SIGNATURE_SIZE + QRCNV_PNG_IHDR_SIZE + QRCNV_PNG_PLTE_SIZE;
+	idat = wbuf + QRCNV_PNG_SIGNATURE_SIZE + QRCNV_PNG_IHDR_SIZE;
 	wptr = qrPngWriteEndIdat(wptr, idat, (int)(wptr - idat) - 8);
 	wptr = qrPngWriteIend(wptr);
 	*size = (int)(wptr - wbuf);
@@ -501,7 +491,7 @@ qrsSymbolsToPNG(QRStructured *st, int sep, int mag, int order, int *size)
 /* {{{ qrPngWriteHeader() */
 
 /*
- * PNGシグネチャとIHDRチャンク、PLTEチャンクを書き込む
+ * PNGシグネチャとIHDRチャンクを書き込む
  */
 static qr_byte_t *
 qrPngWriteHeader(qr_byte_t *bof, int width, int height)
@@ -520,33 +510,15 @@ qrPngWriteHeader(qr_byte_t *bof, int width, int height)
 	*ptr++ = 'H';
 	*ptr++ = 'D';
 	*ptr++ = 'R';
-	qrPngWriteLong(ptr, width);  // Width
-	qrPngWriteLong(ptr, height); // Height
-	*ptr++ = 1; // Bit depth
-	*ptr++ = 0; // Color type: glayscale
-	*ptr++ = 0; // Compression method
-	*ptr++ = 0; // Filter method
-	*ptr++ = 0; // Interlace method
+	qrPngWriteLong(ptr, width);  /* Width */
+	qrPngWriteLong(ptr, height); /* Height */
+	*ptr++ = 1; /* Bit depth */
+	*ptr++ = 0; /* Color type: glayscale */
+	*ptr++ = 0; /* Compression method */
+	*ptr++ = 0; /* Filter method */
+	*ptr++ = 0; /* Interlace method */
 	c = crc(bof + 12, 4 + QRCNV_PNG_IHDR_DATA_SIZE);
-	qrPngWriteLong(ptr, c); // CRC
-
-	/* PLTE chunk */
-	/*
-	qrPngWriteLong(ptr, QRCNV_PNG_PLTE_DATA_SIZE);
-	*ptr++ = 'P';
-	*ptr++ = 'L';
-	*ptr++ = 'T';
-	*ptr++ = 'E';
-	*ptr++ = 0xffU;
-	*ptr++ = 0xffU;
-	*ptr++ = 0xffU;
-	*ptr++ = 0;
-	*ptr++ = 0;
-	*ptr++ = 0;
-	c = crc(bof + QRCNV_PNG_SIGNATURE_SIZE + QRCNV_PNG_IHDR_SIZE + 4,
-	        4 + QRCNV_PNG_PLTE_DATA_SIZE);
-	qrPngWriteLong(ptr, c); // CRC
-	*/
+	qrPngWriteLong(ptr, c); /* CRC */
 
 	return ptr;
 }
