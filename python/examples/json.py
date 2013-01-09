@@ -3,5 +3,6 @@
 
 import qr
 
-qr.qrcode('spam, egg', open('spam' + qr.extension(qr.JSON) , 'w'),
-        format = qr.JSON, separator = 0)
+f = open('spam' + qr.extension(qr.JSON) , 'w')
+f.write(qr.qrcode('spam, egg', format = qr.JSON, separator = 0))
+f.close()
