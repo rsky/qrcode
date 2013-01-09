@@ -83,38 +83,41 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused);
 /* {{{ internal function prototypes */
 
 static PyObject *
-PyQR_Process(const qr_byte_t *data, int data_len,
+PyQR_Process(const qr_byte_t *data, int size,
              int version, int mode, int eclevel, int masktype,
              int format, int magnify, int separator);
 
 static PyObject *
-PyQR_ProcessMulti(const qr_byte_t *data, int data_len,
+PyQR_ProcessMulti(const qr_byte_t *data, int size,
                   int version, int mode, int eclevel, int masktype, int maxnum,
                   int format, int magnify, int separator, int order);
 
 static QRCode *
-PyQR_Create(const qr_byte_t *data, int data_len,
+PyQR_Create(const qr_byte_t *data, int length,
             int version, int mode, int eclevel, int masktype);
 
 static QRStructured *
-PyQR_CreateMulti(const qr_byte_t *data, int data_len,
+PyQR_CreateMulti(const qr_byte_t *data, int length,
                  int version, int mode, int eclevel, int masktype, int maxnum);
 
 static qr_byte_t *
 PyQR_GetSymbol(QRCode *qr,
-               int format, int separator, int magnify, int *symbol_size);
+               int format, int separator, int magnify, int *size);
 
 static qr_byte_t *
 PyQR_GetSymbols(QRStructured *st,
                 int format, int separator, int magnify,
-                int order, int *symbol_size);
+                int order, int *size);
 
 static PyObject *
 PyQR_GetSymbol_FromObject(QRCodeObject *obj,
                           int format, int separator, int magnify, int order);
 
+static PyObject *
+PyQR_SymbolFromString(qr_byte_t *bytes, int size, int format);
+
 static int
-PyQR_AddData(QRCodeObject *obj, const qr_byte_t *data, int data_len, int mode);
+PyQR_AddData(QRCodeObject *obj, const qr_byte_t *data, int size, int mode);
 
 static void
 PyQR_SetError(int errcode, const char *errmsg);
@@ -138,14 +141,6 @@ PyQR_ActiveFuncName(void);
 typedef int Py_ssize_t;
 #endif
 #endif
-
-static inline int PyQR_IsTextFormat(int format)
-{
-    if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
-        return 1;
-    }
-    return 0;
-}
 
 /* }}} */
 
