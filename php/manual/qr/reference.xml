@@ -195,26 +195,6 @@
 
         <row>
          <entry>
-          <constant id='constantqr-fmt-gif'>QR_FMT_GIF</constant>
-         </entry>
-         <entry>int</entry>
-         <entry>output format: GIF
-</entry>
-        </row>
-
-
-        <row>
-         <entry>
-          <constant id='constantqr-fmt-jpeg'>QR_FMT_JPEG</constant>
-         </entry>
-         <entry>int</entry>
-         <entry>output format: GIF
-</entry>
-        </row>
-
-
-        <row>
-         <entry>
           <constant id='constantqr-fmt-png'>QR_FMT_PNG</constant>
          </entry>
          <entry>int</entry>
@@ -222,35 +202,6 @@
 </entry>
         </row>
 
-
-        <row>
-         <entry>
-          <constant id='constantqr-fmt-wbmp'>QR_FMT_WBMP</constant>
-         </entry>
-         <entry>int</entry>
-         <entry>output format: WBMP (Wireless Bitmap)
-</entry>
-        </row>
-
-
-        <row>
-         <entry>
-          <constant id='constantqr-gd-enabled'>QR_GD_ENABLED</constant>
-         </entry>
-         <entry>int</entry>
-         <entry>If defined, GIF/JPEG/PNG/WBMP output, qr_image_resource() and QRCode::getImageResource() are available.
-</entry>
-        </row>
-
-
-        <row>
-         <entry>
-          <constant id='constantqr-tiff-enabled'>QR_TIFF_ENABLED</constant>
-         </entry>
-         <entry>int</entry>
-         <entry>If defined, TIFF output is available.
-</entry>
-        </row>
 
      </tbody>
     </tgroup>

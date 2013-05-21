@@ -34,12 +34,6 @@
 #include <main/php_logos.h>
 #include "qr_logos.h"
 
-#if PHP_QR_USE_GD_WRAPPERS
-#include "gd_wrappers.h"
-#else
-#include <ext/gd/php_gd.h>
-#endif
-
 /* {{{ module globals */
 
 PHP_QR_LOCAL ZEND_DECLARE_MODULE_GLOBALS(qr)
@@ -51,23 +45,16 @@ PHP_QR_LOCAL ZEND_DECLARE_MODULE_GLOBALS(qr)
 static PHP_MINIT_FUNCTION(qr);
 static PHP_MSHUTDOWN_FUNCTION(qr);
 static PHP_MINFO_FUNCTION(qr);
-static PHP_RINIT_FUNCTION(qr);
-static PHP_RSHUTDOWN_FUNCTION(qr);
 static PHP_GINIT_FUNCTION(qr);
 
 /* }}} */
 
 /* {{{ qr function prototypes */
 
-/*static PHP_FUNCTION(qrcode);*/
 static PHP_FUNCTION(qr_get_symbol);
 static PHP_FUNCTION(qr_output_symbol);
-#ifdef PHP_QR_GD_BUNDLED
-static PHP_FUNCTION(qr_image_resource);
-#endif
 static PHP_FUNCTION(qr_mimetype);
 static PHP_FUNCTION(qr_extension);
-/*static PHP_FUNCTION(qr_imagetype);*/
 
 static PHP_METHOD(QRCode, __construct);
 static PHP_METHOD(QRCode, setErrorHandling);
@@ -77,17 +64,12 @@ static PHP_METHOD(QRCode, setMagnify);
 static PHP_METHOD(QRCode, setOrder);
 static PHP_METHOD(QRCode, addData);
 static PHP_METHOD(QRCode, readData);
-/*static PHP_METHOD(QRCode, remains);*/
 static PHP_METHOD(QRCode, finalize);
 static PHP_METHOD(QRCode, getSymbol);
 static PHP_METHOD(QRCode, outputSymbol);
 static PHP_METHOD(QRCode, getInfo);
-#ifdef PHP_QR_GD_BUNDLED
-static PHP_METHOD(QRCode, getImageResource);
-#endif
 static PHP_METHOD(QRCode, getMimeType);
 static PHP_METHOD(QRCode, getExtension);
-/*static PHP_METHOD(QRCode, getImageType);*/
 static PHP_METHOD(QRCode, current);
 static PHP_METHOD(QRCode, key);
 static PHP_METHOD(QRCode, next);
@@ -144,42 +126,6 @@ _qrs_get_symbols(const qr_byte_t *data, int data_len,
 		int format, int separator, int magnify, int order,
 		int *symbol_size TSRMLS_DC);
 
-#ifdef PHP_QR_GD_BUNDLED
-#include <ext/gd/libgd/gd.h>
-
-/**
- * convert the QR Code symbol to the GD image resource
- * (libqr/qrcnv_gd.c)
- */
-PHP_QR_LOCAL gdImagePtr
-qrSymbolToGdImagePtr(QRCode *qr, int sep, int mag, int *fgcolor, int *bgcolor);
-
-/**
- * convert the structured append QR Code symbol to the GD image resource
- * (libqr/qrcnv_gd.c)
- */
-PHP_QR_LOCAL gdImagePtr
-qrsSymbolsToGdImagePtr(QRStructured *st, int sep, int mag, int order, int *fgcolor, int *bgcolor);
-
-/**
- * get the GD image resource of the QR Code symbol
- */
-static gdImagePtr
-_qr_get_gdimage(const qr_byte_t *data, int data_len,
-		int version, int mode, int eclevel, int masktype,
-		int separator, int magnify,
-		int *fgcolor, int *bgcolor TSRMLS_DC);
-
-/**
- * get the GD image resource of the structured append QR Code symbol
- */
-static gdImagePtr
-_qrs_get_gdimage(const qr_byte_t *data, int data_len,
-		int version, int mode, int eclevel, int masktype, int maxnum,
-		int separator, int magnify, int order,
-		int *fgcolor, int *bgcolor TSRMLS_DC);
-#endif
-
 /**
  * open the stream
  *
@@ -202,124 +148,78 @@ _qr_stream_open(zval *zv, char *alt_url, char *mode,
 #define qr_get_output_stream(zv) \
 	_qr_stream_open((zv), "php://output", "wb", NULL, "output" TSRMLS_CC)
 
-/**
- * get the image type identifier which corresponds to given format
- */
-/*static zval *
-_qr_imagetype(zval *zv, int format TSRMLS_DC);
-
-#define qr_imagetype(zv, format) _qr_imagetype((zv), (format) TSRMLS_CC)*/
-
-/* }}} */
-
 /* {{{ Argument information of qr_* functions */
 
-#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
-#define ARG_INFO_STATIC static
-#else
-#define ARG_INFO_STATIC
-#endif
-
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qr_get_symbol, 0, 0, 1)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qr_get_symbol, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_ARRAY_INFO(0, options, 0)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qr_output_symbol, 0, 0, 2)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qr_output_symbol, 0, 0, 2)
 	ZEND_ARG_INFO(0, output)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_ARRAY_INFO(0, options, 0)
 ZEND_END_ARG_INFO()
 
-#ifdef PHP_QR_GD_BUNDLED
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qr_image_resource, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_ARRAY_INFO(0, options, 0)
-	ZEND_ARG_INFO(1, colors)
-ZEND_END_ARG_INFO()
-#endif
-
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qr_mimetype, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qr_mimetype, 0)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qr_extension, 0, 0, 1)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qr_extension, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, include_dot)
 ZEND_END_ARG_INFO()
-/*
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qr_imagetype, 0)
-	ZEND_ARG_INFO(0, format)
-ZEND_END_ARG_INFO()
-*/
+
 /* }}} */
 /* {{{ Argument information of QRCode methods */
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_ctor, 0, 0, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_ctor, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, options, 0)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_eh, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_eh, 0)
 	ZEND_ARG_INFO(0, errmode)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_format, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_format, 0)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_separator, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_separator, 0)
 	ZEND_ARG_INFO(0, separator)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_magnify, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_magnify, 0)
 	ZEND_ARG_INFO(0, magnify)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_order, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qrcode_set_order, 0)
 	ZEND_ARG_INFO(0, order)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_add_data, 0, 0, 1)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_add_data, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_read_data, 0, 0, 1)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_read_data, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_output_symbol, 0, 0, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_output_symbol, 0, 0, 0)
 	ZEND_ARG_INFO(0, output)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_get_image_resource, 0, 0, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_get_image_resource, 0, 0, 0)
 	ZEND_ARG_INFO(1, colors)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_get_extension, 0, 0, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO_EX(arginfo_qrcode_get_extension, 0, 0, 0)
 	ZEND_ARG_INFO(0, include_dot)
 ZEND_END_ARG_INFO()
 
-ARG_INFO_STATIC
-ZEND_BEGIN_ARG_INFO(arginfo_qrcode_seek, 0)
+unsigned int sep, unsigned int mag, unsigned int *sizeZEND_BEGIN_ARG_INFO(arginfo_qrcode_seek, 0)
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO()
 
@@ -530,12 +430,8 @@ static zend_function_entry qrcode_methods[] = {
 	PHP_ME(QRCode, getSymbol,        NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, outputSymbol,     arginfo_qrcode_output_symbol,  ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, getInfo,          NULL,                          ZEND_ACC_PUBLIC)
-#ifdef PHP_QR_GD_BUNDLED
-	PHP_ME(QRCode, getImageResource, arginfo_qrcode_get_image_resource, ZEND_ACC_PUBLIC)
-#endif
 	PHP_ME(QRCode, getMimeType,      NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, getExtension,     arginfo_qrcode_get_extension,  ZEND_ACC_PUBLIC)
-/*	PHP_ME(QRCode, getImageType,     NULL,                          ZEND_ACC_PUBLIC)*/
 	PHP_ME(QRCode, current,          NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, key,              NULL,                          ZEND_ACC_PUBLIC)
 	PHP_ME(QRCode, next,             NULL,                          ZEND_ACC_PUBLIC)
@@ -553,13 +449,9 @@ static zend_function_entry qr_functions[] = {
 	PHP_FALIAS(qrcode, qr_get_symbol,   arginfo_qr_get_symbol)
 	PHP_FE(qr_get_symbol,       arginfo_qr_get_symbol)
 	PHP_FE(qr_output_symbol,    arginfo_qr_output_symbol)
-#ifdef PHP_QR_GD_BUNDLED
-	PHP_FE(qr_image_resource,   arginfo_qr_image_resource)
-#endif
 	PHP_FE(qr_mimetype,         arginfo_qr_mimetype)
 	PHP_FE(qr_extension,        arginfo_qr_extension)
-/*	PHP_FE(qr_imagetype,        arginfo_qr_imagetype)*/
-	{ NULL, NULL, NULL, 0, 0 }
+	PHP_FE_END
 };
 /* }}} */
 
@@ -567,10 +459,7 @@ static zend_function_entry qr_functions[] = {
 
 static zend_module_dep qr_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
-#ifdef PHP_QR_GD_BUNDLED
-	ZEND_MOD_REQUIRED("gd")
-#endif
-	{ NULL, NULL, NULL, 0 }
+	ZEND_MOD_END
 };
 
 /* }}} */
@@ -585,8 +474,8 @@ zend_module_entry qr_module_entry = {
 	qr_functions,
 	PHP_MINIT(qr),
 	PHP_MSHUTDOWN(qr),
-	PHP_RINIT(qr),
-	PHP_RSHUTDOWN(qr),
+	NULL,
+	NULL,
 	PHP_MINFO(qr),
 	PHP_QR_MODULE_VERSION,
 	PHP_MODULE_GLOBALS(qr),
@@ -822,43 +711,14 @@ static ZEND_INI_MH(QrOnUpdateFormat)
 		*p = QR_FMT_BMP;
 	} else if (value_length == 3 && strcasecmp("svg", value) == 0) {
 		*p = QR_FMT_SVG;
-#ifdef PHP_QR_ENABLE_TIFF
 	} else if ((value_length == 4 && strcasecmp("tiff", value) == 0) ||
 		(value_length == 3 && strcasecmp("tif", value) == 0)) {
 		*p = QR_FMT_TIFF;
-#endif
-#ifdef PHP_QR_GD_BUNDLED
-	} else if (value_length == 3 && strcasecmp("gif", value) == 0) {
-		*p = QR_FMT_GIF;
-	} else if ((value_length == 4 && strcasecmp("jpeg", value) == 0) ||
-		(value_length == 3 && strcasecmp("jpg", value) == 0)) {
-		*p = QR_FMT_JPEG;
 	} else if (value_length == 3 && strcasecmp("png", value) == 0) {
 		*p = QR_FMT_PNG;
-	} else if (value_length == 4 && strcasecmp("wbmp", value) == 0) {
-		*p = QR_FMT_WBMP;
-#elif PHP_QR_ENABLE_PNG
-	} else if (value_length == 3 && strcasecmp("png", value) == 0) {
-		*p = QR_FMT_PNG;
-#endif
 	} else {
 		long foramt = zend_atoi(new_value, new_value_length);
-		if (foramt >= QR_FMT_DIGIT && foramt < QR_FMT_COUNT) {
-#ifndef PHP_QR_ENABLE_TIFF
-			if (foramt == QR_FMT_TIFF) {
-				return FAILURE;
-			}
-#endif
-#if !defined(PHP_QR_ENABLE_PNG) && !defined(PHP_QR_GD_BUNDLED)
-			if (foramt == QR_FMT_PNG) {
-				return FAILURE;
-			}
-#endif
-#ifndef PHP_QR_GD_BUNDLED
-			if (foramt == QR_FMT_GIF || foramt == QR_FMT_JPEG || foramt == QR_FMT_WBMP) {
-				return FAILURE;
-			}
-#endif
+		if (foramt >= 0 && foramt < QR_FMT_COUNT) {
 			*p = foramt;
 		} else {
 			return FAILURE;
@@ -900,9 +760,6 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(qr)
 {
-#if PHP_QR_USE_GD_WRAPPERS
-	_qr_wrappers_init(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 	REGISTER_INI_ENTRIES();
 	php_register_info_logo(QR_LOGO_GUID, QR_LOGO_TYPE, qr_logo, QR_LOGO_SIZE);
 
@@ -915,29 +772,14 @@ PHP_MINIT_FUNCTION(qr)
 	QR_REGISTER_CONSTANT(QR_ECL_M);
 	QR_REGISTER_CONSTANT(QR_ECL_Q);
 	QR_REGISTER_CONSTANT(QR_ECL_H);
+	QR_REGISTER_CONSTANT(QR_FMT_PNG);
+	QR_REGISTER_CONSTANT(QR_FMT_BMP);
+	QR_REGISTER_CONSTANT(QR_FMT_TIFF);
+	QR_REGISTER_CONSTANT(QR_FMT_PBM);
+	QR_REGISTER_CONSTANT(QR_FMT_SVG);
+	QR_REGISTER_CONSTANT(QR_FMT_JSON);
 	QR_REGISTER_CONSTANT(QR_FMT_DIGIT);
 	QR_REGISTER_CONSTANT(QR_FMT_ASCII);
-	QR_REGISTER_CONSTANT(QR_FMT_JSON);
-	QR_REGISTER_CONSTANT(QR_FMT_PBM);
-	QR_REGISTER_CONSTANT(QR_FMT_BMP);
-	QR_REGISTER_CONSTANT(QR_FMT_SVG);
-	QR_REGISTER_CONSTANT(QR_FMT_TIFF);
-	QR_REGISTER_CONSTANT(QR_FMT_GIF);
-	QR_REGISTER_CONSTANT(QR_FMT_JPEG);
-	QR_REGISTER_CONSTANT(QR_FMT_PNG);
-	QR_REGISTER_CONSTANT(QR_FMT_WBMP);
-#undef QR_REGISTER_CONSTANT
-
-#ifdef PHP_QR_GD_BUNDLED
-	REGISTER_LONG_CONSTANT("QR_GD_ENABLED", 1L, CONST_PERSISTENT | CONST_CS);
-#else
-	REGISTER_LONG_CONSTANT("QR_GD_ENABLED", 0, CONST_PERSISTENT | CONST_CS);
-#endif
-#ifdef PHP_QR_ENABLE_TIFF
-	REGISTER_LONG_CONSTANT("QR_TIFF_ENABLED", 1L, CONST_PERSISTENT | CONST_CS);
-#else
-	REGISTER_LONG_CONSTANT("QR_TIFF_ENABLED", 0, CONST_PERSISTENT | CONST_CS);
-#endif
 
 	/* fetch exception class entries */
 	ext_ce_RuntimeException = _qr_get_class_entry("runtimeexception" TSRMLS_CC);
@@ -981,9 +823,6 @@ PHP_MINIT_FUNCTION(qr)
 #define QRCODE_DECLARE_CONSTANT(name) \
 		zend_declare_class_constant_long(qrcode_ce, #name, sizeof(#name) - 1, (long)QR_ ## name TSRMLS_CC)
 
-#define QRCODE_DECLARE_CONSTANT_EX(name, value) \
-		zend_declare_class_constant_long(qrcode_ce, #name, sizeof(#name) - 1, value TSRMLS_CC)
-
 		QRCODE_DECLARE_CONSTANT(EM_AUTO);
 		QRCODE_DECLARE_CONSTANT(EM_NUMERIC);
 		QRCODE_DECLARE_CONSTANT(EM_ALNUM);
@@ -993,36 +832,14 @@ PHP_MINIT_FUNCTION(qr)
 		QRCODE_DECLARE_CONSTANT(ECL_M);
 		QRCODE_DECLARE_CONSTANT(ECL_Q);
 		QRCODE_DECLARE_CONSTANT(ECL_H);
+		QRCODE_DECLARE_CONSTANT(FMT_PNG);
+		QRCODE_DECLARE_CONSTANT(FMT_BMP);
+		QRCODE_DECLARE_CONSTANT(FMT_TIFF);
+		QRCODE_DECLARE_CONSTANT(FMT_PBM);
+		QRCODE_DECLARE_CONSTANT(FMT_SVG);
+		QRCODE_DECLARE_CONSTANT(FMT_JSON);
 		QRCODE_DECLARE_CONSTANT(FMT_DIGIT);
 		QRCODE_DECLARE_CONSTANT(FMT_ASCII);
-		QRCODE_DECLARE_CONSTANT(FMT_JSON);
-		QRCODE_DECLARE_CONSTANT(FMT_PBM);
-		QRCODE_DECLARE_CONSTANT(FMT_BMP);
-		QRCODE_DECLARE_CONSTANT(FMT_SVG);
-		QRCODE_DECLARE_CONSTANT(FMT_TIFF);
-		QRCODE_DECLARE_CONSTANT(FMT_GIF);
-		QRCODE_DECLARE_CONSTANT(FMT_JPEG);
-		QRCODE_DECLARE_CONSTANT(FMT_PNG);
-		QRCODE_DECLARE_CONSTANT(FMT_WBMP);
-
-#ifdef PHP_QR_GD_BUNDLED
-		QRCODE_DECLARE_CONSTANT_EX(GD_ENABLED, 1L);
-		QRCODE_DECLARE_CONSTANT_EX(PNG_ENABLED, 1L);
-#elif defined(PHP_QR_ENABLE_PNG)
-		QRCODE_DECLARE_CONSTANT_EX(GD_ENABLED, 0);
-		QRCODE_DECLARE_CONSTANT_EX(PNG_ENABLED, 1L);
-#else
-		QRCODE_DECLARE_CONSTANT_EX(GD_ENABLED, 0);
-		QRCODE_DECLARE_CONSTANT_EX(PNG_ENABLED, 0);
-#endif
-#ifdef PHP_QR_ENABLE_TIFF
-		QRCODE_DECLARE_CONSTANT_EX(TIFF_ENABLED, 1L);
-#else
-		QRCODE_DECLARE_CONSTANT_EX(TIFF_ENABLED, 0);
-#endif
-
-#undef QRCODE_DECLARE_CONSTANT
-#undef QRCODE_DECLARE_CONSTANT_EX
 
 		zend_declare_class_constant_long(qrcode_ce,
 				"ERRMODE_SILENT", sizeof("ERRMODE_SILENT") - 1,
@@ -1090,16 +907,6 @@ PHP_MINFO_FUNCTION(qr)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Module Version", PHP_QR_MODULE_VERSION);
 	php_info_print_table_row(2, "Library Version", LIBQR_VERSION);
-#ifdef PHP_QR_GD_BUNDLED
-	php_info_print_table_row(2, "GD Support", "enabled, use PHP GD extension");
-#else
-	php_info_print_table_row(2, "GD Support", "disabled");
-#endif
-#ifdef PHP_QR_ENABLE_TIFF
-	php_info_print_table_row(2, "TIFF Support", "enabled");
-#else
-	php_info_print_table_row(2, "TIFF Support", "disabled");
-#endif
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -1118,55 +925,6 @@ static PHP_GINIT_FUNCTION(qr)
 	qr_globals->default_separator = 4;
 	qr_globals->default_maxnum = 1;
 	qr_globals->default_order = 0;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION */
-static PHP_RINIT_FUNCTION(qr)
-{
-#if PHP_QR_USE_GD_WRAPPERS
-#define QR_FCALL_INFO_INIT(name) \
-	if (_qr_fcall_info_init("image" #name, \
-			&QRG(func_##name) TSRMLS_CC) == FAILURE) { \
-		return FAILURE; \
-	}
-	QR_FCALL_INFO_INIT(create);
-/*	QR_FCALL_INFO_INIT(destroy);*/
-	QR_FCALL_INFO_INIT(colorallocate);
-	QR_FCALL_INFO_INIT(palettecopy);
-	QR_FCALL_INFO_INIT(fill);
-	QR_FCALL_INFO_INIT(filledrectangle);
-	QR_FCALL_INFO_INIT(setpixel);
-	QR_FCALL_INFO_INIT(gif);
-	QR_FCALL_INFO_INIT(jpeg);
-	QR_FCALL_INFO_INIT(png);
-	QR_FCALL_INFO_INIT(wbmp);
-#undef QR_FCALL_INFO_INIT
-#endif
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
-static PHP_RSHUTDOWN_FUNCTION(qr)
-{
-#if PHP_QR_USE_GD_WRAPPERS
-#define QR_FCALL_INFO_DESTROY(name) \
-	_qr_fcall_info_destroy(&QRG(func_##name) TSRMLS_CC)
-	QR_FCALL_INFO_DESTROY(create);
-/*	QR_FCALL_INFO_DESTROY(destroy);*/
-	QR_FCALL_INFO_DESTROY(colorallocate);
-	QR_FCALL_INFO_DESTROY(palettecopy);
-	QR_FCALL_INFO_DESTROY(fill);
-	QR_FCALL_INFO_DESTROY(filledrectangle);
-	QR_FCALL_INFO_DESTROY(setpixel);
-	QR_FCALL_INFO_DESTROY(gif);
-	QR_FCALL_INFO_DESTROY(jpeg);
-	QR_FCALL_INFO_DESTROY(png);
-	QR_FCALL_INFO_DESTROY(wbmp);
-#undef QR_FCALL_INFO_DESTROY
-#endif
-	return SUCCESS;
 }
 /* }}} */
 
@@ -1333,68 +1091,6 @@ _qrs_get_symbols(const qr_byte_t *data, int data_len,
 }
 /* }}} */
 
-#ifdef PHP_QR_GD_BUNDLED
-/* {{{ _qr_get_gdimage()
- * get the GD image resource of the QR Code symbol
- */
-static gdImagePtr
-_qr_get_gdimage(const qr_byte_t *data, int data_len,
-		int version, int mode, int eclevel, int masktype,
-		int separator, int magnify,
-		int *fgcolor, int *bgcolor TSRMLS_DC)
-{
-	QRCode *qr = NULL;
-	gdImagePtr im = NULL;
-
-	qr = _qr_create_simple(data, data_len, version, mode, eclevel, masktype TSRMLS_CC);
-	if (!qr) {
-		return NULL;
-	}
-
-	im = qrSymbolToGdImagePtr(qr, separator, magnify, fgcolor, bgcolor);
-	if (!im) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", qrGetErrorInfo(qr));
-		qrDestroy(qr);
-		return NULL;
-	}
-
-	qrDestroy(qr);
-
-	return im;
-}
-/* }}} */
-
-/* {{{ _qrs_get_gdimage()
- * get the GD image resource of the structured append QR Code symbol
- */
-static gdImagePtr
-_qrs_get_gdimage(const qr_byte_t *data, int data_len,
-		int version, int mode, int eclevel, int masktype, int maxnum,
-		int separator, int magnify, int order,
-		int *fgcolor, int *bgcolor TSRMLS_DC)
-{
-	QRStructured *st;
-	gdImagePtr im = NULL;
-
-	st = _qrs_create_simple(data, data_len, version, mode, eclevel, masktype, maxnum TSRMLS_CC);
-	if (!st) {
-		return NULL;
-	}
-
-	im = qrsSymbolsToGdImagePtr(st, separator, magnify, order, fgcolor, bgcolor);
-	if (!im) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", qrsGetErrorInfo(st));
-		qrsDestroy(st);
-		return NULL;
-	}
-
-	qrsDestroy(st);
-
-	return im;
-}
-/* }}} */
-#endif
-
 /* {{{ _qr_stream_open()
  * open the stream
  *
@@ -1452,52 +1148,6 @@ _qr_stream_open(zval *zv, char *alt_url, char *mode,
 
 	return stream;
 }
-/* }}} */
-
-/* {{{ _qr_imagetype()
- * get the image type identifier which corresponds to given format
- */
-/*static zval *
-_qr_imagetype(zval *zv, int format TSRMLS_DC)
-{
-	zval *retval = NULL;
-	image_filetype t = IMAGE_FILETYPE_UNKNOWN;
-
-	if (zv) {
-		retval = zv;
-	} else {
-		MAKE_STD_ZVAL(retval);
-	}
-
-	switch (format) {
-	  case QR_FMT_BMP:
-		t = IMAGE_FILETYPE_BMP;
-		break;
-	  case QR_FMT_TIFF:
-		t = IMAGE_FILETYPE_TIFF_MM;
-		break;
-	  case QR_FMT_GIF:
-		t = IMAGE_FILETYPE_GIF;
-		break;
-	  case QR_FMT_JPEG:
-		t = IMAGE_FILETYPE_JPEG;
-		break;
-	  case QR_FMT_PNG:
-		t = IMAGE_FILETYPE_PNG;
-		break;
-	  case QR_FMT_WBMP:
-		t = IMAGE_FILETYPE_WBMP;
-		break;
-	}
-
-	if (t == IMAGE_FILETYPE_UNKNOWN) {
-		ZVAL_FALSE(retval);
-	} else {
-		ZVAL_LONG(retval, (long)t);
-	}
-
-	return retval;
-}*/
 /* }}} */
 
 /* {{{ _qr_get_class_entry()
@@ -1650,69 +1300,6 @@ static PHP_FUNCTION(qr_output_symbol)
 }
 /* }}} qr_output_symbol */
 
-#ifdef PHP_QR_GD_BUNDLED
-/* {{{ proto resource qr_image_resource(string data[, array options[, &array colors]])
-   */
-static PHP_FUNCTION(qr_image_resource)
-{
-	char *data = NULL;
-	int data_len = 0;
-	zval *options = NULL;
-	zval *colors = NULL;
-
-	int version = QR_DEFAULT(version);
-	int mode = QR_DEFAULT(mode);
-	int eclevel = QR_DEFAULT(eclevel);
-	int masktype = QR_DEFAULT(masktype);
-	int magnify = QR_DEFAULT(magnify);
-	int separator = QR_DEFAULT(separator);
-	int maxnum = QR_DEFAULT(maxnum);
-	int order = QR_DEFAULT(order);
-
-	gdImagePtr im = NULL;
-	int fgcolor = -1;
-	int bgcolor = -1;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|az",
-			&data, &data_len, &options, &colors) == FAILURE)
-	{
-		return;
-	}
-
-	if (options) {
-		qr_parse_options(Z_ARRVAL_P(options), &version, &mode, &eclevel, &masktype,
-				NULL, &magnify, &separator, &maxnum, &order);
-	}
-
-	if (maxnum == 1) {
-		im = _qr_get_gdimage((qr_byte_t *)data, data_len,
-				version, mode, eclevel, masktype,
-				separator, magnify, &fgcolor, &bgcolor TSRMLS_CC);
-	} else {
-		if (version == -1) {
-			version = 1;
-		}
-		im = _qrs_get_gdimage((qr_byte_t *)data, data_len,
-				version, mode, eclevel, masktype, maxnum,
-				separator, magnify, order, &fgcolor, &bgcolor TSRMLS_CC);
-	}
-
-	if (!im) {
-		RETURN_FALSE;
-	}
-
-	if (colors) {
-		zval_dtor(colors);
-		array_init(colors);
-		add_next_index_long(colors, fgcolor);
-		add_next_index_long(colors, bgcolor);
-	}
-
-	ZEND_REGISTER_RESOURCE(return_value, im, phpi_get_le_gd());
-}
-/* }}} qr_image_resource */
-#endif
-
 /* {{{ proto string qr_mimetype(int format)
    */
 static PHP_FUNCTION(qr_mimetype)
@@ -1763,22 +1350,6 @@ static PHP_FUNCTION(qr_extension)
 	}
 }
 /* }}} qr_extension */
-
-/* {{{ proto int qr_imagetype(int format)
-   */
-/*static PHP_FUNCTION(qr_imagetype)
-{
-	long format = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
-			&format) == FAILURE)
-	{
-		return;
-	}
-
-	(void)qr_imagetype(return_value, (int)format);
-}*/
-/* }}} qr_imagetype */
 
 /* {{{ proto void QRCode::__construct([array options])
    */
@@ -2265,58 +1836,6 @@ static PHP_METHOD(QRCode, getInfo)
 }
 /* }}} QRCode::getInfo */
 
-#ifdef PHP_QR_GD_BUNDLED
-/* {{{ proto resource QRCode::getImageResource([array &colors])
-   */
-static PHP_METHOD(QRCode, getImageResource)
-{
-	qrcode_object *intern = NULL;
-	zval *colors = NULL;
-
-	gdImagePtr im = NULL;
-	int fgcolor = -1;
-	int bgcolor = -1;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z",
-			&colors) == FAILURE)
-	{
-		return;
-	}
-
-	intern = qrcode_get_object();
-	if (!isFinalized(intern)) {
-		error_not_finalized(intern->errmode);
-		return;
-	}
-
-	if (intern->st) {
-		im = qrsSymbolsToGdImagePtr(intern->st,
-				intern->separator, intern->magnify, intern->order, &fgcolor, &bgcolor);
-		if (!im) {
-			php_qr_error_from_object2(intern);
-			RETURN_FALSE;
-		}
-	} else {
-		im = qrSymbolToGdImagePtr(intern->qr,
-				intern->separator, intern->magnify, &fgcolor, &bgcolor);
-		if (!im) {
-			php_qr_error_from_object(intern);
-			RETURN_FALSE;
-		}
-	}
-
-	if (colors) {
-		zval_dtor(colors);
-		array_init(colors);
-		add_next_index_long(colors, fgcolor);
-		add_next_index_long(colors, bgcolor);
-	}
-
-	ZEND_REGISTER_RESOURCE(return_value, im, phpi_get_le_gd());
-}
-/* }}} QRCode::getImageResource */
-#endif
-
 /* {{{ proto string QRCode::getMimeType(void)
    */
 static PHP_METHOD(QRCode, getMimeType)
@@ -2368,22 +1887,6 @@ static PHP_METHOD(QRCode, getExtension)
 	}
 }
 /* }}} QRCode::getExtension */
-
-/* {{{ proto int QRCode::getImageType(void)
-   */
-/*static PHP_METHOD(QRCode, getImageType)
-{
-	qrcode_object *intern = NULL;
-
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
-	}
-
-	intern = qrcode_get_object();
-
-	(void)qr_imagetype(return_value, intern->format);
-}*/
-/* }}} QRCode::getImageType */
 
 /* {{{ proto string QRCode::current(void)
    */

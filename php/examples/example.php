@@ -1,6 +1,4 @@
 <?php
-extension_loaded('qr') || dl('qr.so') || exit(1);
-
 $data = 'ＱＲコードは、（株）デンソーウェーブの登録商標です。';
 $data = mb_convert_encoding($data, 'SJIS-win', 'UTF-8');
 

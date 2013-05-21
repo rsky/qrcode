@@ -2,7 +2,6 @@
 <!ENTITY reference.qr.configure SYSTEM './qr/configure.xml'>
 <!ENTITY reference.qr.functions.qr-get-symbol SYSTEM './qr/functions/qr-get-symbol.xml'>
 <!ENTITY reference.qr.functions.qr-output-symbol SYSTEM './qr/functions/qr-output-symbol.xml'>
-<!ENTITY reference.qr.functions.qr-image-resource SYSTEM './qr/functions/qr-image-resource.xml'>
 <!ENTITY reference.qr.functions.qr-mimetype SYSTEM './qr/functions/qr-mimetype.xml'>
 <!ENTITY reference.qr.functions.qr-extension SYSTEM './qr/functions/qr-extension.xml'>
 <!ENTITY reference.qr.functions SYSTEM './functions.xml'>

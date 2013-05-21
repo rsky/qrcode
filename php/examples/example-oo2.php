@@ -1,6 +1,4 @@
 <?php
-extension_loaded('qr') || dl('qr.so') || exit(1);
-
 // デフォルト値を設定
 ini_set('qr.default_format', QR_FMT_PNG);
 ini_set('qr.default_magnify', 3);

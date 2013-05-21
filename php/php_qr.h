@@ -70,28 +70,6 @@ extern "C" {
 #define PHP_QR_ERRMODE_WARNING 1
 #define PHP_QR_ERRMODE_EXCEPTION 2
 
-#ifndef PHP_QR_USE_GD_WRAPPERS
-#ifdef PHP_QR_GD_BUNDLED
-#if PHP_VERSION_ID >= 50300
-#define PHP_QR_USE_GD_WRAPPERS 1
-#else
-#define PHP_QR_USE_GD_WRAPPERS 0
-#endif
-#else
-#define PHP_QR_USE_GD_WRAPPERS 0
-#endif
-#endif
-
-/* {{{ type definitions */
-
-typedef struct _qr_fcall_info {
-	zval *name;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-} qr_fcall_info;
-
-/* }}} */
-
 /* {{{ module globals */
 
 ZEND_BEGIN_MODULE_GLOBALS(qr)
@@ -104,19 +82,6 @@ ZEND_BEGIN_MODULE_GLOBALS(qr)
 	long default_separator;
 	long default_maxnum;
 	long default_order;
-#if PHP_QR_USE_GD_WRAPPERS
-	qr_fcall_info func_create;
-/*	qr_fcall_info func_destroy;*/
-	qr_fcall_info func_colorallocate;
-	qr_fcall_info func_palettecopy;
-	qr_fcall_info func_fill;
-	qr_fcall_info func_filledrectangle;
-	qr_fcall_info func_setpixel;
-	qr_fcall_info func_gif;
-	qr_fcall_info func_jpeg;
-	qr_fcall_info func_png;
-	qr_fcall_info func_wbmp;
-#endif
 ZEND_END_MODULE_GLOBALS(qr)
 
 #ifdef ZTS
