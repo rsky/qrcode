@@ -458,9 +458,11 @@ qrGetParameter(int argc, char **argv,
 				*fmt = QR_FMT_BMP;
 			} else if (!strcasecmp(ptr, "svg")) {
 				*fmt = QR_FMT_SVG;
-#ifdef QR_ENABLE_TIFF
 			} else if (!strcasecmp(ptr, "tiff") | !strcasecmp(ptr, "tif")) {
+#ifdef QR_ENABLE_TIFF
 				*fmt = QR_FMT_TIFF;
+#else
+
 #endif /* QR_ENABLE_TIFF */
 #ifdef QR_ENABLE_GD
 			} else if (!strcasecmp(ptr, "gif")) {

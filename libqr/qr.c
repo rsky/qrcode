@@ -86,7 +86,7 @@ qrInit(int version, int mode, int eclevel, int masktype, int *errcode)
 	/*
 	 * 符号化モードを設定する
 	*/
-	if (mode == QR_EM_AUTO || (mode >= QR_EM_NUMERIC && mode < QR_EM_MAX)) {
+	if (mode == QR_EM_AUTO || (mode >= QR_EM_NUMERIC && mode < QR_EM_COUNT)) {
 		qr->param.mode = mode;
 	} else {
 		*errcode = QR_ERR_INVALID_MODE;
@@ -97,7 +97,7 @@ qrInit(int version, int mode, int eclevel, int masktype, int *errcode)
 	/*
 	 * 誤り訂正レベルを設定する
 	*/
-	if (eclevel >= QR_ECL_L && eclevel < QR_EM_MAX) {
+	if (eclevel >= QR_ECL_L && eclevel < QR_EM_COUNT) {
 		qr->param.eclevel = eclevel;
 	} else {
 		*errcode = QR_ERR_INVALID_ECL;
@@ -167,7 +167,7 @@ qrsInit(int version, int mode, int eclevel, int masktype, int maxnum, int *errco
 	/*
 	 * 符号化モードを設定する
 	*/
-	if (mode == QR_EM_AUTO || (mode >= QR_EM_NUMERIC && mode < QR_EM_MAX)) {
+	if (mode == QR_EM_AUTO || (mode >= QR_EM_NUMERIC && mode < QR_EM_COUNT)) {
 		st->param.mode = mode;
 	} else {
 		*errcode = QR_ERR_INVALID_MODE;
@@ -178,7 +178,7 @@ qrsInit(int version, int mode, int eclevel, int masktype, int maxnum, int *errco
 	/*
 	 * 誤り訂正レベルを設定する
 	*/
-	if (eclevel >= QR_ECL_L && eclevel < QR_EM_MAX) {
+	if (eclevel >= QR_ECL_L && eclevel < QR_EM_COUNT) {
 		st->param.eclevel = eclevel;
 	} else {
 		*errcode = QR_ERR_INVALID_ECL;
@@ -517,6 +517,9 @@ qrStrError(int errcode)
 
 	  case QR_ERR_INVALID_MAXNUM:
 		return "Invalid maximum symbol number";
+
+	  case QR_ERR_UNSUPPORTED_FMT:
+		return "Unsupported output format";
 
 	  case QR_ERR_EMPTY_PARAM:
 		return "Parameter required";
@@ -923,7 +926,7 @@ qrAddData2(QRCode *qr, const qr_byte_t *source, int size, int mode)
 	 */
 	if (mode == QR_EM_AUTO) {
 		mode = qrDetectDataType(source, size);
-	} else if (mode < QR_EM_NUMERIC || mode >= QR_EM_MAX) {
+	} else if (mode < QR_EM_NUMERIC || mode >= QR_EM_COUNT) {
 		qrSetErrorInfo(qr, QR_ERR_INVALID_MODE, NULL);
 		return FALSE;
 	}
@@ -1203,7 +1206,7 @@ qrEncodeDataWord(QRCode *qr, const qr_byte_t *source, int size, int mode)
 	int dwpos = qr->dwbit;
 	int dwbit = qr->dwpos;
 
-	if (mode < QR_EM_NUMERIC || mode >= QR_EM_MAX) {
+	if (mode < QR_EM_NUMERIC || mode >= QR_EM_COUNT) {
 		e = QR_ERR_INVALID_MODE;
 		goto err;
 	}
@@ -2434,7 +2437,7 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 	qr_byte_t *buf;
 	int _size;
 
-	static QRConverter cnv[QR_FMT_MAX] = {
+	static const QRConverter cnv[QR_FMT_COUNT] = {
 		qrSymbolToDigit,
 		qrSymbolToASCII,
 		qrSymbolToJSON,
@@ -2458,8 +2461,13 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 #endif /* QR_ENABLE_GD */
 	};
 
-	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_MAX || cnv[fmt] == NULL) {
+	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT) {
 		qrSetErrorInfo(qr, QR_ERR_INVALID_FMT, NULL);
+		return NULL;
+	}
+
+	if (cnv[fmt] == NULL) {
+		qrSetErrorInfo(qr, QR_ERR_UNSUPPORTED_FMT, NULL);
 		return NULL;
 	}
 
@@ -2543,7 +2551,7 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 	qr_byte_t *buf;
 	int _size;
 
-	static QRsConverter cnv[QR_FMT_MAX] = {
+	static QRsConverter cnv[QR_FMT_COUNT] = {
 		qrsSymbolsToDigit,
 		qrsSymbolsToASCII,
 		qrsSymbolsToJSON,
@@ -2567,7 +2575,7 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 #endif /* QR_ENABLE_GD */
 	};
 
-	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_MAX || cnv[fmt] == NULL) {
+	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT || cnv[fmt] == NULL) {
 		qrSetErrorInfo(st->cur, QR_ERR_INVALID_FMT, NULL);
 		return NULL;
 	}

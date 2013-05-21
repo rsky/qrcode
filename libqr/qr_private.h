@@ -396,19 +396,19 @@ static const qr_byte_t qr_alignpattern[QR_DIM_ALIGN][QR_DIM_ALIGN] = {
 /*
  * モード指示子(英字, 英数字, 8ビットバイト, 漢字)
  */
-static const int qr_modeid[QR_EM_MAX] = { 0x01, 0x02, 0x04, 0x08 };
+static const int qr_modeid[QR_EM_COUNT] = { 0x01, 0x02, 0x04, 0x08 };
 
 /*
  * 符号化モード名 (不使用)
  */
-/*const char *qr_modename[QR_EM_MAX] = {
+/*const char *qr_modename[QR_EM_COUNT] = {
 	"Numeric", "Alnum", "8bit-byte", "Kanji"
 };*/
 
 /*
  * エラー訂正レベル名
  */
-const char *qr_eclname[QR_ECL_MAX] = { "L", "M", "Q", "H" };
+const char *qr_eclname[QR_ECL_COUNT] = { "L", "M", "Q", "H" };
 
 /*
  * 英数字モードの符号化表

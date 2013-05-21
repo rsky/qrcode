@@ -40,7 +40,7 @@
 #define QRCMD_EXTRA_PARAM_C &order, &extra,
 #define QRCMD_EXTRA_PARAM_D int *order, int *extra,
 #define QRCMD_MAX_NUM_A int maxnum = QR_STA_MAX;
-#define QRCMD_MAX_NUM_B maxnum, 
+#define QRCMD_MAX_NUM_B maxnum,
 #define QRCMD_DEFAULT_VERSION 1
 
 /* functions */

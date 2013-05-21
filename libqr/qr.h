@@ -36,59 +36,57 @@ extern "C" {
 #define LIBQR_VERSION "0.3.1"
 
 /*
- * 汎用エラーコード
+ * エラーコード
  */
-#define QR_ERR_PSEUDO             -1
-#define QR_ERR_NONE                0
-#define QR_ERR_USAGE            0x68
-#define QR_ERR_NOT_IMPL         0x69
-#define QR_ERR_SEE_ERRNO        0x6e
-#define QR_ERR_FOPEN            0x6f
-#define QR_ERR_FREAD            0x72
-#define QR_ERR_STATE            0x73
-#define QR_ERR_UNKNOWN          0x75
-#define QR_ERR_FWRITE           0x77
-#define QR_ERR_MEMORY_EXHAUSTED 0x78
+typedef enum {
+	/* 汎用エラーコード */
+	QR_ERR_NONE             = 0,
+	QR_ERR_USAGE            = 0x68,
+	QR_ERR_NOT_IMPL         = 0x69,
+	QR_ERR_SEE_ERRNO        = 0x6e,
+	QR_ERR_FOPEN            = 0x6f,
+	QR_ERR_FREAD            = 0x72,
+	QR_ERR_STATE            = 0x73,
+	QR_ERR_UNKNOWN          = 0x75,
+	QR_ERR_FWRITE           = 0x77,
+	QR_ERR_MEMORY_EXHAUSTED = 0x78,
 
-/*
- * パラメータ用エラーコード
- */
-#define QR_ERR_INVALID_ARG      0x01
-#define QR_ERR_INVALID_VERSION  0x02
-#define QR_ERR_INVALID_MODE     0x03
-#define QR_ERR_INVALID_ECL      0x04
-#define QR_ERR_INVALID_MPT      0x05
-#define QR_ERR_INVALID_MAG      0x06
-#define QR_ERR_INVALID_SEP      0x07
-#define QR_ERR_INVALID_SIZE     0x08
-#define QR_ERR_INVALID_FMT      0x09
-#define QR_ERR_INVALID_OUT      0x0a
-#define QR_ERR_INVALID_MAXNUM   0x0b
-#define QR_ERR_EMPTY_PARAM      0x0f
+	/* パラメータ用エラーコード */
+	QR_ERR_INVALID_ARG     = 0x01,
+	QR_ERR_INVALID_VERSION = 0x02,
+	QR_ERR_INVALID_MODE    = 0x03,
+	QR_ERR_INVALID_ECL     = 0x04,
+	QR_ERR_INVALID_MPT     = 0x05,
+	QR_ERR_INVALID_MAG     = 0x06,
+	QR_ERR_INVALID_SEP     = 0x07,
+	QR_ERR_INVALID_SIZE    = 0x08,
+	QR_ERR_INVALID_FMT     = 0x09,
+	QR_ERR_INVALID_OUT     = 0x0a,
+	QR_ERR_INVALID_MAXNUM  = 0x0b,
+	QR_ERR_UNSUPPORTED_FMT = 0x0c,
+	QR_ERR_EMPTY_PARAM     = 0x0f,
 
-/*
- * 入力データ用エラーコード
- */
-#define QR_ERR_EMPTY_SRC        0x10
-#define QR_ERR_LARGE_SRC        0x11
-#define QR_ERR_NOT_NUMERIC      0x12
-#define QR_ERR_NOT_ALNUM        0x13
-#define QR_ERR_NOT_KANJI        0x14
+	/* 入力データ用エラーコード */
+	QR_ERR_EMPTY_SRC   = 0x10,
+	QR_ERR_LARGE_SRC   = 0x11,
+	QR_ERR_NOT_NUMERIC = 0x12,
+	QR_ERR_NOT_ALNUM   = 0x13,
+	QR_ERR_NOT_KANJI   = 0x14,
 
-/*
- * 画像処理用エラーコード
- */
-#define QR_ERR_IMAGE_TOO_LARGE  0x30
-#define QR_ERR_WIDTH_TOO_LARGE  0x31
-#define QR_ERR_HEIGHT_TOO_LARGE 0x32
-#define QR_ERR_IMAGECREATE      0x33
-#define QR_ERR_IMAGEFORMAT      0x34
-#define QR_ERR_IMAGEFRAME       0x35
+	/* 画像処理用エラーコード */
+	QR_ERR_IMAGE_TOO_LARGE  = 0x30,
+	QR_ERR_WIDTH_TOO_LARGE  = 0x31,
+	QR_ERR_HEIGHT_TOO_LARGE = 0x32,
+	QR_ERR_IMAGECREATE      = 0x33,
+	QR_ERR_IMAGEFORMAT      = 0x34,
+	QR_ERR_IMAGEFRAME       = 0x35,
 
-/*
- * zlib用エラーコード
- */
-#define QR_ERR_DEFLATE          0x40
+	/* zlib用エラーコード */
+	QR_ERR_DEFLATE = 0x40,
+
+	/* その他 */
+	QR_ERR_PSEUDO = -1
+} qr_err_t;
 
 /*
  * 内部状態
@@ -100,37 +98,50 @@ extern "C" {
 /*
  * 符号化モード
  */
-#define QR_EM_AUTO     -1  /* 自動選択 */
-#define QR_EM_NUMERIC   0  /* 数字 */
-#define QR_EM_ALNUM     1  /* 英数字: 0-9 A-Z SP $%*+-./: */
-#define QR_EM_8BIT      2  /* 8ビットバイト */
-#define QR_EM_KANJI     3  /* 漢字 */
-#define QR_EM_MAX       4  /* モード総数 */
+typedef enum {
+	QR_EM_AUTO    = -1, /* 自動選択 */
+	QR_EM_NUMERIC =  0, /* 数字 */
+	QR_EM_ALNUM   =  1, /* 英数字: 0-9 A-Z SP $%*+-./: */
+	QR_EM_8BIT    =  2, /* 8ビットバイト */
+	QR_EM_KANJI   =  3  /* 漢字 */
+} qr_em_t;
+
+/* モード総数 */
+#define QR_EM_COUNT 4
 
 /*
  * 誤り訂正レベル
  */
-#define QR_ECL_L        0  /* レベルL */
-#define QR_ECL_M        1  /* レベルM */
-#define QR_ECL_Q        2  /* レベルQ */
-#define QR_ECL_H        3  /* レベルH */
-#define QR_ECL_MAX      4  /* レベル総数 */
+typedef enum {
+	QR_ECL_L = 0, /* レベルL */
+	QR_ECL_M = 1, /* レベルM */
+	QR_ECL_Q = 2, /* レベルQ */
+	QR_ECL_H = 3  /* レベルH */
+} qr_ecl_t;
+
+/* レベル総数 */
+#define QR_ECL_COUNT 4
 
 /*
  * 出力形式
  */
-#define QR_FMT_DIGIT    0  /* 文字列 */
-#define QR_FMT_ASCII    1  /* アスキーアート */
-#define QR_FMT_JSON     2  /* JSON */
-#define QR_FMT_PBM      3  /* PBM */
-#define QR_FMT_BMP      4  /* BMP */
-#define QR_FMT_SVG      5  /* SVG */
-#define QR_FMT_TIFF     6  /* TIFF (zlib) */
-#define QR_FMT_GIF      7  /* GIF  (GD) */
-#define QR_FMT_JPEG     8  /* JPEG (GD) */
-#define QR_FMT_PNG      9  /* PNG  (GD) */
-#define QR_FMT_WBMP    10  /* WBMP (GD) */
-#define QR_FMT_MAX     11  /* 出力形式総数 */
+typedef enum {
+	QR_FMT_DIGIT =  0, /* 文字列 */
+	QR_FMT_ASCII =  1, /* アスキーアート */
+	QR_FMT_JSON  =  2, /* JSON */
+	QR_FMT_PBM   =  3, /* PBM */
+	QR_FMT_BMP   =  4, /* BMP */
+	QR_FMT_SVG   =  5, /* SVG */
+	QR_FMT_TIFF  =  6, /* TIFF (zlib) */
+	QR_FMT_GIF   =  7, /* GIF  (GD) */
+	QR_FMT_JPEG  =  8, /* JPEG (GD) */
+	QR_FMT_PNG   =  9, /* PNG  (GD/zlib) */
+	QR_FMT_WBMP  = 10, /* WBMP (GD) */
+	QR_FMT_UNAVAILABLE = -1 /* 利用不可 */
+} qr_format_t;
+
+/* 出力形式総数 */
+#define QR_FMT_COUNT 11
 
 /*
  * モジュール値のマスク
@@ -198,7 +209,7 @@ typedef struct qr_rsblock_t {
  */
 typedef struct qr_eclevel_t {
   int datawords;                /* データコード語数(全RSブロック) */
-  int capacity[QR_EM_MAX];      /* 符号化モードごとのデータ容量 */
+  int capacity[QR_EM_COUNT];    /* 符号化モードごとのデータ容量 */
   int nrsb;                     /* RSブロックの種類(1または2) */
   qr_rsblock_t rsb[QR_RSB_MAX]; /* RSブロックごとの情報 */
 } qr_eclevel_t;
@@ -211,8 +222,8 @@ typedef struct qr_vertable_t {
   int          dimension;         /* 1辺のモジュール数 */
   int          totalwords;        /* 総コード語数 */
   int          remainedbits;      /* 剰余ビット数 */
-  int          nlen[QR_EM_MAX];   /* 文字数指示子のビット数 */
-  qr_eclevel_t ecl[QR_ECL_MAX];   /* 誤り訂正レベルごとの情報 */
+  int          nlen[QR_EM_COUNT]; /* 文字数指示子のビット数 */
+  qr_eclevel_t ecl[QR_ECL_COUNT]; /* 誤り訂正レベルごとの情報 */
   int          aplnum;            /* 位置合わせパターン中心座標数 */
   int          aploc[QR_APL_MAX]; /* 位置合わせパターン中心座標 */
 } qr_vertable_t;

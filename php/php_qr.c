@@ -698,7 +698,7 @@ static ZEND_INI_MH(QrOnUpdateMode)
 		*p = QR_EM_KANJI;
 	} else {
 		long mode = zend_atoi(new_value, new_value_length);
-		if (mode == QR_EM_AUTO || (mode >= QR_EM_NUMERIC && mode < QR_EM_MAX)) {
+		if (mode == QR_EM_AUTO || (mode >= QR_EM_NUMERIC && mode < QR_EM_COUNT)) {
 			*p = mode;
 		} else {
 			return FAILURE;
@@ -744,7 +744,7 @@ static ZEND_INI_MH(QrOnUpdateEclevel)
 		*p = QR_ECL_H;
 	} else {
 		long eclevel = zend_atoi(new_value, new_value_length);
-		if (eclevel >= QR_ECL_L && eclevel < QR_ECL_MAX) {
+		if (eclevel >= QR_ECL_L && eclevel < QR_ECL_COUNT) {
 			*p = eclevel;
 		} else {
 			return FAILURE;
@@ -843,7 +843,7 @@ static ZEND_INI_MH(QrOnUpdateFormat)
 #endif
 	} else {
 		long foramt = zend_atoi(new_value, new_value_length);
-		if (foramt >= QR_FMT_DIGIT && foramt < QR_FMT_MAX) {
+		if (foramt >= QR_FMT_DIGIT && foramt < QR_FMT_COUNT) {
 #ifndef PHP_QR_ENABLE_TIFF
 			if (foramt == QR_FMT_TIFF) {
 				return FAILURE;

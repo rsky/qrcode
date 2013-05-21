@@ -3,7 +3,7 @@
  * PNG (Portable Network Graphics) Specification, Version 1.1
  * 15. Appendix: Sample CRC Code
  * http://www.libpng.org/pub/png/spec/1.1/PNG-CRCAppendix.html
- */ 
+ */
 
 #ifdef uint32_t
 typedef uint32_t crc_t;
