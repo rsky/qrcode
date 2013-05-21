@@ -1,5 +1,5 @@
 project(qr)
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.6.0)
 
 set(QR_VERSION "1.0.0")
 set(QR_SOVERSION "1")
@@ -29,9 +29,8 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 add_executable(qrcmd ${QR_COMMAND_SOURCES})
 add_executable(qrcmd_multi ${QR_COMMAND_SOURCES})
 
-add_library(libqr_object OBJECT ${QR_LIBRARY_SOURCES})
-add_library(libqr_shared SHARED $<TARGET_OBJECTS:libqr_object>)
-add_library(libqr_static STATIC $<TARGET_OBJECTS:libqr_object>)
+add_library(libqr_shared SHARED ${QR_LIBRARY_SOURCES})
+add_library(libqr_static STATIC ${QR_LIBRARY_SOURCES})
 
 target_link_libraries(qrcmd libqr_shared)
 target_link_libraries(qrcmd_multi libqr_shared)
@@ -52,11 +51,6 @@ set_target_properties(libqr_shared PROPERTIES
 set_target_properties(libqr_static PROPERTIES
     OUTPUT_NAME qr
 )
-if (NOT(CMAKE_SYSTEM_NAME MATCHES "Darwin|Windows"))
-    set_target_properties(libqr_object PROPERTIES
-        COMPILE_FLAGS -fPIC
-    )
-endif ()
 
 install(TARGETS qrcmd qrcmd_multi libqr_shared libqr_static
     RUNTIME DESTINATION ${bindir}
