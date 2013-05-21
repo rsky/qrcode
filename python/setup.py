@@ -3,15 +3,12 @@
 from distutils.core import setup, Extension
 
 module1 = Extension('qr',
-        define_macros = [('QR_PYTHON_MODULE', 1),
-                         ('QR_STATIC_BUILD', 1),
-                         ('QR_ENABLE_PNG', 1)],
         include_dirs = ['./libqr'],
         libraries = ['z'],
         library_dirs = [],
         sources = ['qrmodule.c', 'libqr/qr.c', 'libqr/qrcnv.c',
                    'libqr/qrcnv_bmp.c', 'libqr/qrcnv_png.c',
-                   'libqr/qrcnv_svg.c'])
+                   'libqr/qrcnv_svg.c', 'libqr/qrcnv_tiff.c'])
 
 setup(name = 'qr',
         version = '0.2.1',
