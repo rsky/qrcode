@@ -77,7 +77,7 @@
 		qrWriteRow(ix, mag); \
 	} \
 	/* 分離パターン (下) */ \
-	for (i = 0; i < sepdim; i++) { \
+	if (sepdim > 0) { \
 		qrInitRow(filler); \
 		qrWriteBOR(); \
 		qrWriteBLM(j, imgdim); \
