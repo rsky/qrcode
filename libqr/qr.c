@@ -2449,16 +2449,11 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 #else
 		NULL,
 #endif /* QR_ENABLE_TIFF */
-#ifdef QR_ENABLE_GD
-		qrSymbolToGIF,
-		qrSymbolToJPEG,
-		qrSymbolToPNG,
-		qrSymbolToWBMP
-#elif defined(QR_ENABLE_PNG)
+#ifdef QR_ENABLE_PNG
 		NULL, NULL, qrSymbolToPNG, NULL
 #else
 		NULL, NULL, NULL, NULL
-#endif /* QR_ENABLE_GD */
+#endif /* QR_ENABLE_PNG */
 	};
 
 	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT) {
@@ -2563,16 +2558,11 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 #else
 		NULL,
 #endif /* QR_ENABLE_TIFF */
-#ifdef QR_ENABLE_GD
-		qrsSymbolsToGIF,
-		qrsSymbolsToJPEG,
-		qrsSymbolsToPNG,
-		qrsSymbolsToWBMP
-#elif defined(QR_ENABLE_PNG)
+#ifdef QR_ENABLE_PNG
 		NULL, NULL, qrsSymbolsToPNG, NULL
 #else
 		NULL, NULL, NULL, NULL
-#endif /* QR_ENABLE_GD */
+#endif /* QR_ENABLE_PNG */
 	};
 
 	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT || cnv[fmt] == NULL) {

@@ -33,26 +33,6 @@ if test "$PHP_QR" != "no"; then
   QR_SOURCES="php_qr.c libqr/qr.c libqr/qrcnv.c libqr/qrcnv_bmp.c libqr/qrcnv_svg.c"
 
   dnl
-  dnl Check the gd support
-  dnl
-  if test "$PHP_QR_GD" != "no"; then
-    AC_DEFINE(PHP_QR_ENABLE_GD, 1, [enable GD support])
-    AC_DEFINE(PHP_QR_GD_BUNDLED, 1, [use gd extension])
-    AC_DEFINE(QR_ENABLE_GD, 1, [enable GD support in libqr])
-    QR_SOURCES="$QR_SOURCES libqr/qrcnv_gd.c"
-
-    PHP_QR_PHP_VERNUM=`"$PHP_CONFIG" --version | $AWK -F. '{ printf "%d", ($1 * 100 + $2) * 100 }'`
-    if test "$PHP_QR_PHP_VERNUM" -ge 50300; then
-      QR_SOURCES="$QR_SOURCES gd_wrappers.c"
-      AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 1, [ ])
-    else
-      AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
-    fi
-  else
-    AC_DEFINE(PHP_QR_USE_GD_WRAPPERS, 0, [ ])
-  fi
-
-  dnl
   dnl Check the zlib support
   dnl
   if test "$PHP_QR_PNG$PHP_QR_TIFF" != "nono"; then

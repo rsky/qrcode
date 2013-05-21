@@ -113,49 +113,6 @@ main(int argc, char **argv)
 				return 1;
 			}
 		}
-#ifdef QR_ENABLE_GD
-	} else if (extra) {
-		/*
-		 * GIFアニメ出力
-		 */
-		qr_byte_t *buf;
-		FILE *fp;
-		if (output[0] == '\0') {
-			fp = stdout;
-		} else {
-			fp = fopen(&(output[0]), "rb");
-			if (fp == NULL) {
-				qrSetErrorInfo2(qr->cur, QR_ERR_FOPEN, &(output[0]));
-				ewritelnf("%s: %s", argv[0], qrCmdGetErrorInfo(qr));
-				qrCmdDestroy(qr);
-				return -1;
-			}
-		}
-		buf = qrsSymbolsToGIFAnim(qr, sep, mag, extra, &result);
-		if (buf == NULL) {
-			ewritelnf("%s: %s", argv[0], qrCmdGetErrorInfo(qr));
-			qrCmdDestroy(qr);
-			if (output[0] != '\0') {
-				fclose(fp);
-			}
-			return -1;
-		}
-		fwrite(buf, (size_t)result, 1, fp);
-		if (ferror(fp)) {
-			qrSetErrorInfo(qr->cur, QR_ERR_FWRITE, NULL);
-			ewritelnf("%s: %s", argv[0], qrCmdGetErrorInfo(qr));
-			qrCmdDestroy(qr);
-			free(buf);
-			if (output[0] != '\0') {
-				fclose(fp);
-			}
-			return -1;
-		}
-		free(buf);
-		if (output[0] != '\0') {
-			fclose(fp);
-		}
-#endif
 	} else
 #endif
 	if (output[0] == '\0') {
@@ -223,10 +180,7 @@ qrShowHelp(void)
 #ifdef QR_ENABLE_TIFF
 	", TIFF"
 #endif
-#ifdef QR_ENABLE_GD
-	",");
-	writeln("                          GIF, JPEG, PNG, WBMP"
-#elif defined(QR_ENABLE_PNG)
+#ifdef QR_ENABLE_PNG
 	", PNG"
 #endif
 	);
@@ -237,9 +191,6 @@ qrShowHelp(void)
 #ifdef QR_ENABLE_TIFF
 	writeln("                          TIFF  -> tif");
 #endif
-#ifdef QR_ENABLE_GD
-	writeln("                          JPEG  -> jpg");
-#endif
 #ifdef QRCMD_STRUCTURED_APPEND
 	writelnf("  -a, --maxnum=NUM      maximum number of symbols (1-%d, default: %d)", QR_STA_MAX, QR_STA_MAX);
 	writeln("  -z, --order=NUM       ordering method of symbols, in case NUM is ...");
@@ -249,11 +200,6 @@ qrShowHelp(void)
 	writeln("  --serial              output as serial numbered images");
 	writeln("                        Number and extension will be added to output pathname.");
 	writeln("                        (default: output as a combined image)");
-#ifdef QR_ENABLE_GD
-	writeln("  --animation[=FLOAT]   output as a GIF animation (default: see -t option)");
-	writeln("                        FLOAT is the interval. If not specified, 1.0 is used.");
-	writeln("                        NOTICE: conflict with --serial option");
-#endif
 #endif
 	writeln("  -o, --output=PATH     output pathname (default: write to stdout)");
 	writeln("  -i, --input=PATH      input pathname (default: read from stdin)");
@@ -464,19 +410,10 @@ qrGetParameter(int argc, char **argv,
 #else
 
 #endif /* QR_ENABLE_TIFF */
-#ifdef QR_ENABLE_GD
-			} else if (!strcasecmp(ptr, "gif")) {
-				*fmt = QR_FMT_GIF;
-			} else if (!strcasecmp(ptr, "jpeg") || !strcasecmp(ptr, "jpg")) {
-				*fmt = QR_FMT_JPEG;
+#ifdef QR_ENABLE_PNG
 			} else if (!strcasecmp(ptr, "png")) {
 				*fmt = QR_FMT_PNG;
-			} else if (!strcasecmp(ptr, "wbmp")) {
-				*fmt = QR_FMT_WBMP;
-#elif defined(QR_ENABLE_PNG)
-			} else if (!strcasecmp(ptr, "png")) {
-				*fmt = QR_FMT_PNG;
-#endif /* QR_ENABLE_GD */
+#endif /* QR_ENABLE_PNG */
 			} else {
 				errx(1, "%s: %s", ptr, qrStrError(QR_ERR_INVALID_FMT));
 			}
