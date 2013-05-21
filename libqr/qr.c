@@ -377,17 +377,14 @@ QR_API const char *
 qrMimeType(int format)
 {
 	switch (format) {
+		case QR_FMT_PNG:    return "image/png";
+		case QR_FMT_BMP:    return "image/bmp";
+		case QR_FMT_TIFF:   return "image/tiff";
+		case QR_FMT_PBM:    return "image/x-portable-bitmap";
+		case QR_FMT_SVG:    return "image/svg+xml";
+		case QR_FMT_JSON:   return "application/json";
 		case QR_FMT_DIGIT:  return "text/plain";
 		case QR_FMT_ASCII:  return "text/plain";
-		case QR_FMT_JSON:   return "application/json"; /* RFC 4627 */
-		case QR_FMT_PBM:    return "image/x-portable-bitmap";
-		case QR_FMT_BMP:    return "image/bmp";
-		case QR_FMT_SVG:    return "image/svg+xml";
-		case QR_FMT_TIFF:   return "image/tiff";
-		case QR_FMT_GIF:    return "image/gif";
-		case QR_FMT_JPEG:   return "image/jpeg";
-		case QR_FMT_PNG:    return "image/png";
-		case QR_FMT_WBMP:   return "image/vnd.wap.wbmp";
 		default: return NULL;
 	}
 }
@@ -399,17 +396,14 @@ QR_API const char *
 qrExtension(int format)
 {
 	switch (format) {
+		case QR_FMT_PNG:    return "png";
+		case QR_FMT_BMP:    return "bmp";
+		case QR_FMT_TIFF:   return "tiff";
+		case QR_FMT_PBM:    return "pbm";
+		case QR_FMT_SVG:    return "svg";
+		case QR_FMT_JSON:   return "json";
 		case QR_FMT_DIGIT:  return "txt";
 		case QR_FMT_ASCII:  return "txt";
-		case QR_FMT_JSON:   return "json"; /* RFC 4627 */
-		case QR_FMT_PBM:    return "pbm";
-		case QR_FMT_BMP:    return "bmp";
-		case QR_FMT_SVG:    return "svg";
-		case QR_FMT_TIFF:   return "tiff";
-		case QR_FMT_GIF:    return "gif";
-		case QR_FMT_JPEG:   return "jpg";
-		case QR_FMT_PNG:    return "png";
-		case QR_FMT_WBMP:   return "wbmp";
 		default: return NULL;
 	}
 }
@@ -2438,22 +2432,14 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 	int _size;
 
 	static const QRConverter cnv[QR_FMT_COUNT] = {
-		qrSymbolToDigit,
-		qrSymbolToASCII,
-		qrSymbolToJSON,
-		qrSymbolToPBM,
+		qrSymbolToPNG,
 		qrSymbolToBMP,
-		qrSymbolToSVG,
-#ifdef QR_ENABLE_TIFF
 		qrSymbolToTIFF,
-#else
-		NULL,
-#endif /* QR_ENABLE_TIFF */
-#ifdef QR_ENABLE_PNG
-		NULL, NULL, qrSymbolToPNG, NULL
-#else
-		NULL, NULL, NULL, NULL
-#endif /* QR_ENABLE_PNG */
+		qrSymbolToPBM,
+		qrSymbolToSVG,
+		qrSymbolToJSON,
+		qrSymbolToDigit,
+		qrSymbolToASCII
 	};
 
 	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT) {
@@ -2547,25 +2533,17 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 	int _size;
 
 	static QRsConverter cnv[QR_FMT_COUNT] = {
-		qrsSymbolsToDigit,
-		qrsSymbolsToASCII,
-		qrsSymbolsToJSON,
-		qrsSymbolsToPBM,
+		qrsSymbolsToPNG,
 		qrsSymbolsToBMP,
-		qrsSymbolsToSVG,
-#ifdef QR_ENABLE_TIFF
 		qrsSymbolsToTIFF,
-#else
-		NULL,
-#endif /* QR_ENABLE_TIFF */
-#ifdef QR_ENABLE_PNG
-		NULL, NULL, qrsSymbolsToPNG, NULL
-#else
-		NULL, NULL, NULL, NULL
-#endif /* QR_ENABLE_PNG */
+		qrsSymbolsToPBM,
+		qrsSymbolsToSVG,
+		qrsSymbolsToJSON,
+		qrsSymbolsToDigit,
+		qrsSymbolsToASCII
 	};
 
-	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT || cnv[fmt] == NULL) {
+	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT) {
 		qrSetErrorInfo(st->cur, QR_ERR_INVALID_FMT, NULL);
 		return NULL;
 	}

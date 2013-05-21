@@ -126,22 +126,19 @@ typedef enum {
  * 出力形式
  */
 typedef enum {
-	QR_FMT_DIGIT =  0, /* 文字列 */
-	QR_FMT_ASCII =  1, /* アスキーアート */
-	QR_FMT_JSON  =  2, /* JSON */
+	QR_FMT_PNG   =  0, /* PNG */
+	QR_FMT_BMP   =  1, /* BMP */
+	QR_FMT_TIFF  =  2, /* TIFF */
 	QR_FMT_PBM   =  3, /* PBM */
-	QR_FMT_BMP   =  4, /* BMP */
-	QR_FMT_SVG   =  5, /* SVG */
-	QR_FMT_TIFF  =  6, /* TIFF (zlib) */
-	QR_FMT_GIF   =  7, /* GIF  (GD) */
-	QR_FMT_JPEG  =  8, /* JPEG (GD) */
-	QR_FMT_PNG   =  9, /* PNG  (GD/zlib) */
-	QR_FMT_WBMP  = 10, /* WBMP (GD) */
+	QR_FMT_SVG   =  4, /* SVG */
+	QR_FMT_JSON  =  5, /* JSON */
+	QR_FMT_DIGIT =  6, /* 文字列 */
+	QR_FMT_ASCII =  7, /* アスキーアート */
 	QR_FMT_UNAVAILABLE = -1 /* 利用不可 */
 } qr_format_t;
 
 /* 出力形式総数 */
-#define QR_FMT_COUNT 11
+#define QR_FMT_COUNT 8
 
 /*
  * モジュール値のマスク
@@ -327,10 +324,7 @@ QR_API qr_byte_t *qrSymbolToPBM(QRCode *qr, int sep, int mag, int *size);
 QR_API qr_byte_t *qrSymbolToBMP(QRCode *qr, int sep, int mag, int *size);
 QR_API qr_byte_t *qrSymbolToSVG(QRCode *qr, int sep, int mag, int *size);
 QR_API qr_byte_t *qrSymbolToTIFF(QRCode *qr, int sep, int mag, int *size);
-QR_API qr_byte_t *qrSymbolToGIF(QRCode *qr, int sep, int mag, int *size);
-QR_API qr_byte_t *qrSymbolToJPEG(QRCode *qr, int sep, int mag, int *size);
 QR_API qr_byte_t *qrSymbolToPNG(QRCode *qr, int sep, int mag, int *size);
-QR_API qr_byte_t *qrSymbolToWBMP(QRCode *qr, int sep, int mag, int *size);
 
 /*
  * 構造的連接出力用関数のプロトタイプ
@@ -345,12 +339,7 @@ QR_API qr_byte_t *qrsSymbolsToPBM(QRStructured *st, int sep, int mag, int order,
 QR_API qr_byte_t *qrsSymbolsToBMP(QRStructured *st, int sep, int mag, int order, int *size);
 QR_API qr_byte_t *qrsSymbolsToSVG(QRStructured *st, int sep, int mag, int order, int *size);
 QR_API qr_byte_t *qrsSymbolsToTIFF(QRStructured *st, int sep, int mag, int order, int *size);
-QR_API qr_byte_t *qrsSymbolsToGIF(QRStructured *st, int sep, int mag, int order, int *size);
-QR_API qr_byte_t *qrsSymbolsToJPEG(QRStructured *st, int sep, int mag, int order, int *size);
 QR_API qr_byte_t *qrsSymbolsToPNG(QRStructured *st, int sep, int mag, int order, int *size);
-QR_API qr_byte_t *qrsSymbolsToWBMP(QRStructured *st, int sep, int mag, int order, int *size);
-
-QR_API qr_byte_t *qrsSymbolsToGIFAnim(QRStructured *st, int sep, int mag, int delay, int *size);
 
 #ifdef __cplusplus
 } // extern "C"

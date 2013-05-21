@@ -22,7 +22,6 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${libdir}")
 find_package(ZLIB)
 
 add_definitions(-Wall -Wextra)
-add_definitions(-DQR_ENABLE_PNG -DQR_ENABLE_TIFF)
 
 include_directories(${ZLIB_INCLUDE_DIRS})
 

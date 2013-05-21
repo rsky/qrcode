@@ -176,21 +176,12 @@ qrShowHelp(void)
 	writeln("                        '4' is the lower limit of the QR Code specification.");
 	writeln("  -f, --format=FORMAT   output format (default: PBM)");
 	writeln("                        Available formats are followings.");
-	writeln("                          DIGIT, ASCII, JSON, PBM, BMP, SVG"
-#ifdef QR_ENABLE_TIFF
-	", TIFF"
-#endif
-#ifdef QR_ENABLE_PNG
-	", PNG"
-#endif
-	);
+	writeln("                          PNG, BMP, TIFF, PBM, SVG, JSON, DIGIT, ASCII");
 	writeln("                        These are case-insensitive and some have aliases.");
 	writeln("                          DIGIT -> 01");
 	writeln("                          ASCII -> asciiart, aa");
 	writeln("                          JSON  -> javascript, js");
-#ifdef QR_ENABLE_TIFF
 	writeln("                          TIFF  -> tif");
-#endif
 #ifdef QRCMD_STRUCTURED_APPEND
 	writelnf("  -a, --maxnum=NUM      maximum number of symbols (1-%d, default: %d)", QR_STA_MAX, QR_STA_MAX);
 	writeln("  -z, --order=NUM       ordering method of symbols, in case NUM is ...");
