@@ -1,10 +1,6 @@
 TODO:
 - test on Win32
 - test on Cygwin (if I could)
-- test on Linux
-- test on OpenSolaris
-- test on Solaris, HP-UX and AIX (if I could)
-- write configure script (without GNU autotools as possible)
 - write tests
 - write manpage of qr(1), qrs(1) and libqr(3)
 - localization support by ICU4C
