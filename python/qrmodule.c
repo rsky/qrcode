@@ -50,6 +50,9 @@ struct _QRCodeObject {
 
 #define PYQR_USE_DEFAULT_MODE INT_MIN
 
+#define PYQR_FORMAT_PIL_IMAGE -1
+#define QR_FMT_IMAGE PYQR_FORMAT_PIL_IMAGE
+
 static PyObject *QRCodeError;
 
 static const char *active_func_name;
@@ -373,15 +376,26 @@ PyQR_Process(const qr_byte_t *data, int length,
     QRCode *qr;
     qr_byte_t *symbol;
     int size = 0;
+    int return_image = 0;
 
     qr = PyQR_Create(data, length, version, mode, eclevel, masktype);
     if (qr == NULL) {
         return NULL;
     }
 
+    if (format == PYQR_FORMAT_PIL_IMAGE) {
+        format = QR_FMT_PNG;
+        return_image = 1;
+    }
+
     symbol = PyQR_GetSymbol(qr, format, separator, scale, &size);
     if (symbol) {
-        result = PyQR_SymbolFromString(symbol, size, format);
+        if (return_image) {
+            result = PyQR_GetImage_FromSymbol(symbol, size);
+        }
+        else {
+            result = PyQR_GetString_FromSymbol(symbol, size, format);
+        }
         free(symbol);
     }
 
@@ -469,6 +483,7 @@ PyQR_ProcessMulti(const qr_byte_t *data, int length,
     QRStructured *st;
     qr_byte_t *symbol;
     int size = 0;
+    int return_image = 0;
 
     st = PyQR_CreateMulti(data, length,
                           version, mode, eclevel, masktype, maxnum);
@@ -476,9 +491,19 @@ PyQR_ProcessMulti(const qr_byte_t *data, int length,
         return NULL;
     }
 
+    if (format == PYQR_FORMAT_PIL_IMAGE) {
+        format = QR_FMT_PNG;
+        return_image = 0;
+    }
+
     symbol = PyQR_GetSymbols(st, format, separator, scale, order, &size);
     if (symbol) {
-        result = PyQR_SymbolFromString(symbol, size, format);
+        if (return_image) {
+            result = PyQR_GetImage_FromSymbol(symbol, size);
+        }
+        else {
+            result = PyQR_GetString_FromSymbol(symbol, size, format);
+        }
         free(symbol);
     }
 
@@ -603,6 +628,12 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
     int size = 0;
     int errcode = QR_ERR_NONE;
     int is_copy = 0;
+    int return_image = 0;
+
+    if (format == PYQR_FORMAT_PIL_IMAGE) {
+        format = QR_FMT_PNG;
+        return_image = 1;
+    }
 
     if (obj->qr) {
         QRCode *qr = obj->qr;
@@ -650,7 +681,12 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
 
     if (symbol) {
         if (!PyErr_Occurred()) {
-            result = PyQR_SymbolFromString(symbol, size, format);
+            if (return_image) {
+                result = PyQR_GetImage_FromSymbol(symbol, size);
+            }
+            else {
+                result = PyQR_GetString_FromSymbol(symbol, size, format);
+            }
         }
         free(symbol);
     }
@@ -659,10 +695,10 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
 }
 
 /* }}} */
-/* {{{ PyQR_SymbolFromString() */
+/* {{{ PyQR_GetString_FromSymbol() */
 
 static PyObject *
-PyQR_SymbolFromString(qr_byte_t *bytes, int size, int format)
+PyQR_GetString_FromSymbol(qr_byte_t *bytes, int size, int format)
 {
 #if PY_MAJOR_VERSION >= 3
     if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
@@ -672,6 +708,67 @@ PyQR_SymbolFromString(qr_byte_t *bytes, int size, int format)
 #else
     return PyString_FromStringAndSize((char *)bytes, size);
 #endif
+}
+
+/* }}} */
+/* {{{ PyQR_GetImage_FromSymbol() */
+
+static PyObject *
+PyQR_GetImage_FromSymbol(qr_byte_t *bytes, int size)
+{
+    PyObject *data;
+    PyObject *modStringIO, *stringIOFunction, *stringIO;
+    PyObject *modPILImage, *openFunction, *image = NULL;
+
+    // import modules
+    modStringIO = PyImport_ImportModule("cStringIO");
+    modPILImage = PyImport_ImportModule("PIL.Image");
+    if (modStringIO == NULL || modPILImage == NULL) {
+        if (modStringIO != NULL) {
+            Py_DECREF(modStringIO);
+        }
+        if (modPILImage != NULL) {
+            Py_DECREF(modPILImage);
+        }
+        return NULL;
+    }
+
+    // get functions
+    stringIOFunction = PyObject_GetAttrString(modStringIO, "StringIO");
+    openFunction = PyObject_GetAttrString(modPILImage, "open");
+    if (stringIOFunction == NULL || openFunction == NULL) {
+        if (stringIOFunction != NULL) {
+            Py_DECREF(stringIOFunction);
+        }
+        if (openFunction != NULL) {
+            Py_DECREF(openFunction);
+        }
+        Py_DECREF(modStringIO);
+        Py_DECREF(modPILImage);
+        return NULL;
+    }
+
+    // create an Image object
+#if PY_MAJOR_VERSION >= 3
+    data = PyBytes_FromStringAndSize((char *)bytes, size);
+#else
+    data = PyString_FromStringAndSize((char *)bytes, size);
+#endif
+    if (data != NULL) {
+        stringIO = PyObject_CallFunctionObjArgs(stringIOFunction, data, NULL);
+        if (stringIO != NULL) {
+            image = PyObject_CallFunctionObjArgs(openFunction, stringIO, NULL);
+            Py_DECREF(stringIO);
+        }
+        Py_DECREF(data);
+    }
+
+    Py_DECREF(stringIOFunction);
+    Py_DECREF(openFunction);
+    Py_DECREF(modStringIO);
+    Py_DECREF(modPILImage);
+
+    return image;
 }
 
 /* }}} */
@@ -894,6 +991,7 @@ PyQR_InitModule(void)
     QR_DECLARE_CONSTANT(ECL_H);
 
     /* output format (fullname) */
+    QR_DECLARE_CONSTANT(FMT_IMAGE);
     QR_DECLARE_CONSTANT(FMT_PNG);
     QR_DECLARE_CONSTANT(FMT_BMP);
     QR_DECLARE_CONSTANT(FMT_TIFF);
@@ -904,6 +1002,7 @@ PyQR_InitModule(void)
     QR_DECLARE_CONSTANT(FMT_ASCII);
 
     /* output format (alias) */
+    QR_DECLARE_CONSTANT_EX(IMAGE, QR_FMT_IMAGE);
     QR_DECLARE_CONSTANT_EX(PNG,   QR_FMT_PNG);
     QR_DECLARE_CONSTANT_EX(BMP,   QR_FMT_BMP);
     QR_DECLARE_CONSTANT_EX(TIFF,  QR_FMT_TIFF);
