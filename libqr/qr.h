@@ -82,10 +82,7 @@ typedef enum {
 	QR_ERR_IMAGEFRAME       = 0x35,
 
 	/* zlib用エラーコード */
-	QR_ERR_DEFLATE = 0x40,
-
-	/* その他 */
-	QR_ERR_PSEUDO = -1
+	QR_ERR_DEFLATE = 0x40
 } qr_err_t;
 
 /*

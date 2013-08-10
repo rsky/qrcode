@@ -452,7 +452,6 @@ qrStrError(int errcode)
 {
 	switch (errcode) {
 	/* wide use errors */
-	  case QR_ERR_PSEUDO:
 	  case QR_ERR_NONE:
 	  case QR_ERR_USAGE:
 		return "";
