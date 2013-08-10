@@ -391,10 +391,10 @@ PyQR_Process(const qr_byte_t *data, int length,
     symbol = PyQR_GetSymbol(qr, format, separator, scale, &size);
     if (symbol) {
         if (return_image) {
-            result = PyQR_GetImage_FromSymbol(symbol, size);
+            result = PyQR_SymbolImageFromStringAndSize(symbol, size);
         }
         else {
-            result = PyQR_GetString_FromSymbol(symbol, size, format);
+            result = PyQR_SymbolDataFromStringAndSize(symbol, size, format);
         }
         free(symbol);
     }
@@ -499,10 +499,10 @@ PyQR_ProcessMulti(const qr_byte_t *data, int length,
     symbol = PyQR_GetSymbols(st, format, separator, scale, order, &size);
     if (symbol) {
         if (return_image) {
-            result = PyQR_GetImage_FromSymbol(symbol, size);
+            result = PyQR_SymbolImageFromStringAndSize(symbol, size);
         }
         else {
-            result = PyQR_GetString_FromSymbol(symbol, size, format);
+            result = PyQR_SymbolDataFromStringAndSize(symbol, size, format);
         }
         free(symbol);
     }
@@ -682,10 +682,10 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
     if (symbol) {
         if (!PyErr_Occurred()) {
             if (return_image) {
-                result = PyQR_GetImage_FromSymbol(symbol, size);
+                result = PyQR_SymbolImageFromStringAndSize(symbol, size);
             }
             else {
-                result = PyQR_GetString_FromSymbol(symbol, size, format);
+                result = PyQR_SymbolDataFromStringAndSize(symbol, size, format);
             }
         }
         free(symbol);
@@ -695,10 +695,10 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
 }
 
 /* }}} */
-/* {{{ PyQR_GetString_FromSymbol() */
+/* {{{ PyQR_SymbolDataFromStringAndSize() */
 
 static PyObject *
-PyQR_GetString_FromSymbol(qr_byte_t *bytes, int size, int format)
+PyQR_SymbolDataFromStringAndSize(qr_byte_t *bytes, int size, int format)
 {
 #if PY_MAJOR_VERSION >= 3
     switch (format) {
@@ -717,10 +717,10 @@ PyQR_GetString_FromSymbol(qr_byte_t *bytes, int size, int format)
 }
 
 /* }}} */
-/* {{{ PyQR_GetImage_FromSymbol() */
+/* {{{ PyQR_SymbolImageFromStringAndSize() */
 
 static PyObject *
-PyQR_GetImage_FromSymbol(qr_byte_t *bytes, int size)
+PyQR_SymbolImageFromStringAndSize(qr_byte_t *bytes, int size)
 {
     PyObject *data;
     PyObject *modStringIO, *stringIOFunction, *stringIO;

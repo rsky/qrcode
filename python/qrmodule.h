@@ -105,10 +105,10 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
                           int format, int separator, int magnify, int order);
 
 static PyObject *
-PyQR_GetString_FromSymbol(qr_byte_t *bytes, int size, int format);
+PyQR_SymbolDataFromStringAndSize(qr_byte_t *bytes, int size, int format);
 
 static PyObject *
-PyQR_GetImage_FromSymbol(qr_byte_t *bytes, int size);
+PyQR_SymbolImageFromStringAndSize(qr_byte_t *bytes, int size);
 
 static int
 PyQR_AddData(QRCodeObject *obj, const qr_byte_t *data, int size, int mode);
