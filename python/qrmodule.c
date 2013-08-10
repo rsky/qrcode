@@ -41,7 +41,7 @@ struct _QRCodeObject {
     int pos;
     int format;
     int separator;
-    int magnify;
+    int scale;
     int order;
 };
 
@@ -56,7 +56,6 @@ static const char *active_func_name;
 static const char * const fn_qrcode         = "qr.qrcode()";
 static const char * const fn_add_data       = "qr.QRCode.add_data()";
 static const char * const fn_copy           = "qr.QRCode.copy()";
-static const char * const fn_finalize       = "qr.QRCode.finalize()";
 static const char * const fn_get_symbol     = "qr.QRCode.get_symbol()";
 static const char * const fn_get_info       = "qr.QRCode.get_info()";
 
@@ -81,10 +80,9 @@ PyDoc_STRVAR(qrcode__doc__,
 "  eclevel:   error correction level (ECL_{L,M,Q,H}, default: ECL_M)\n"
 "  masktype:  mask pattern (0-7, default: auto)\n"
 "  maxnum:    maximum number of symbols (1-16, default: 1)\n"
-"  format:    output format (default: DIGIT)\n"
+"  format:    output format (default: PNG)\n"
 "             Available formats are followings.\n"
-"               DIGIT, ASCII, JSON, PBM, BMP, SVG,\n"
-"               TIFF, GIF, JPEG, PNG, WBMP\n"
+"               PNG, BMP, TIFF, PBM, SVG, JSON, DIGIT, ASCII\n"
 "  separator: separator pattan width (0-16, default: 4)\n"
 "             '4' is the lower limit of the QR Code specification.\n"
 "  order:     ordering method of symbols, in case value is\n"
@@ -121,12 +119,6 @@ static PyMethodDef QRCode_methods[] = {
         METH_VARARGS | METH_KEYWORDS, NULL },
     { "copy", (PyCFunction)QRCode_copy,
         METH_NOARGS, NULL },
-    { "finalize", (PyCFunction)QRCode_finalize,
-        METH_NOARGS, NULL },
-    { "is_finalized", (PyCFunction)QRCode_is_finalized,
-        METH_NOARGS, NULL },
-    { "has_data", (PyCFunction)QRCode_has_data,
-        METH_NOARGS, NULL },
     { "get_symbol", (PyCFunction)QRCode_get_symbol,
         METH_VARARGS | METH_KEYWORDS, NULL },
     { "get_info", (PyCFunction)QRCode_get_info,
@@ -137,8 +129,8 @@ static PyMethodDef QRCode_methods[] = {
 static PyMemberDef QRCode_members[] = {
     { "format",    T_INT, offsetof(QRCodeObject, format),    0, "format" },
     { "separator", T_INT, offsetof(QRCodeObject, separator), 0, "separator" },
-    { "magnify",   T_INT, offsetof(QRCodeObject, magnify),   0, "magnify" },
-    { "order",     T_INT, offsetof(QRCodeObject, format),    0, "order" },
+    { "scale",     T_INT, offsetof(QRCodeObject, scale),     0, "scale" },
+    { "order",     T_INT, offsetof(QRCodeObject, order),     0, "order" },
     { NULL, 0, 0, 0, NULL }
 };
 
@@ -151,7 +143,7 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
     static char *kwlist[] = {
         "data",
         "version", "mode", "eclevel", "masktype", "maxnum",
-        "format", "separator", "magnify", "order",
+        "format", "separator", "scale", "order",
         NULL
     };
 
@@ -164,8 +156,8 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
     int eclevel = QR_ECL_M;
     int masktype = -1;
     int maxnum = 1;
-    int format = QR_FMT_DIGIT;
-    int magnify = 1;
+    int format = QR_FMT_PNG;
+    int scale = 1;
     int separator = 4;
     int order = 0;
 
@@ -175,7 +167,7 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
                                      &data, &length,
                                      &version, &mode, &eclevel,
                                      &masktype, &maxnum,
-                                     &format, &separator, &magnify, &order)
+                                     &format, &separator, &scale, &order)
     ) {
         return NULL;
     }
@@ -183,7 +175,7 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
     if (maxnum == 1) {
         result = PyQR_Process((const qr_byte_t *)data, length,
                               version, mode, eclevel, masktype,
-                              format, magnify, separator);
+                              format, scale, separator);
     }
     else {
         if (version == -1) {
@@ -191,7 +183,7 @@ qr_qrcode(PyObject *self, PyObject *args, PyObject *kwds)
         }
         result = PyQR_ProcessMulti((const qr_byte_t *)data, length,
                                    version, mode, eclevel, masktype, maxnum,
-                                   format, magnify, separator, order);
+                                   format, scale, separator, order);
     }
 
     return result;
@@ -322,73 +314,11 @@ QRCode_copy(QRCodeObject *self, PyObject *unused)
     copy->qr = qr;
     copy->st = st;
     copy->format = self->format;
-    copy->magnify = self->magnify;
+    copy->scale = self->scale;
     copy->separator = self->separator;
     copy->order = self->order;
 
     return copy;
-}
-
-/* }}} */
-/* {{{ QRCode_finalize() */
-
-static PyObject *
-QRCode_finalize(QRCodeObject *self, PyObject *unused)
-{
-    active_func_name = fn_finalize;
-
-    if (self->qr) {
-        if (!qrFinalize(self->qr)) {
-            PyErr_SetString(QRCodeError, qrGetErrorInfo(self->qr));
-            return NULL;
-        }
-    }
-    else if (self->st) {
-        if (!qrsFinalize(self->st)) {
-            PyErr_SetString(QRCodeError, qrsGetErrorInfo(self->st));
-            return NULL;
-        }
-    }
-
-    Py_RETURN_NONE;
-}
-
-/* }}} */
-/* {{{ QRCode_is_finalized() */
-
-static PyObject *
-QRCode_is_finalized(QRCodeObject *self, PyObject *unused)
-{
-    if (self->qr) {
-        if (qrIsFinalized(self->qr)) {
-            Py_RETURN_TRUE;
-        }
-    }
-    else if (self->st) {
-        if (qrsIsFinalized(self->st)) {
-            Py_RETURN_TRUE;
-        }
-    }
-    Py_RETURN_FALSE;
-}
-
-/* }}} */
-/* {{{ QRCode_has_data() */
-
-static PyObject *
-QRCode_has_data(QRCodeObject *self, PyObject *unused)
-{
-    if (self->qr) {
-        if (qrHasData(self->qr)) {
-            Py_RETURN_TRUE;
-        }
-    }
-    else if (self->st) {
-        if (qrsHasData(self->st)) {
-            Py_RETURN_TRUE;
-        }
-    }
-    Py_RETURN_FALSE;
 }
 
 /* }}} */
@@ -398,11 +328,11 @@ static PyObject *
 QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {
-        "format", "separator", "magnify", "order", NULL
+        "format", "separator", "scale", "order", NULL
     };
 
     int format = self->format;
-    int magnify = self->magnify;
+    int scale = self->scale;
     int separator = self->separator;
     int order = self->order;
 
@@ -410,12 +340,12 @@ QRCode_get_symbol(QRCodeObject *self, PyObject *args, PyObject *kwds)
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "|iiii:QRCode.get_symbol", kwlist,
-                                     &format, &separator, &magnify, &order)
+                                     &format, &separator, &scale, &order)
     ) {
         return NULL;
     }
 
-    return PyQR_GetSymbol_FromObject(self, format, separator, magnify, order);
+    return PyQR_GetSymbol_FromObject(self, format, separator, scale, order);
 }
 
 /* }}} */
@@ -437,7 +367,7 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused)
 static PyObject *
 PyQR_Process(const qr_byte_t *data, int length,
              int version, int mode, int eclevel, int masktype,
-             int format, int magnify, int separator)
+             int format, int scale, int separator)
 {
     PyObject *result = NULL;
     QRCode *qr;
@@ -449,7 +379,7 @@ PyQR_Process(const qr_byte_t *data, int length,
         return NULL;
     }
 
-    symbol = PyQR_GetSymbol(qr, format, separator, magnify, &size);
+    symbol = PyQR_GetSymbol(qr, format, separator, scale, &size);
     if (symbol) {
         result = PyQR_SymbolFromString(symbol, size, format);
         free(symbol);
@@ -501,15 +431,28 @@ PyQR_Create(const qr_byte_t *data, int length,
 
 static qr_byte_t *
 PyQR_GetSymbol(QRCode *qr,
-               int format, int separator, int magnify, int *size)
+               int format, int separator, int scale, int *size)
 {
-    qr_byte_t *symbol;
+    qr_byte_t *symbol = NULL;
+    int errcode = QR_ERR_NONE;
+    QRCode *cp = qrClone(qr, &errcode);
 
-    symbol = qrGetSymbol(qr, format, separator, magnify, size);
-    if (symbol == NULL) {
-        PyQR_SetError(qrGetErrorCode(qr), qrGetErrorInfo(qr));
+    if (cp == NULL) {
+        PyErr_SetString(QRCodeError, qrStrError(errcode));
         return NULL;
     }
+
+    if (qrFinalize(cp)) {
+        symbol = qrGetSymbol(cp, format, separator, scale, size);
+        if (symbol == NULL) {
+            PyQR_SetError(qrGetErrorCode(cp), qrGetErrorInfo(cp));
+        }
+    }
+    else {
+        PyQR_SetError(qrGetErrorCode(cp), qrGetErrorInfo(cp));
+    }
+
+    qrDestroy(cp);
 
     return symbol;
 }
@@ -520,7 +463,7 @@ PyQR_GetSymbol(QRCode *qr,
 static PyObject *
 PyQR_ProcessMulti(const qr_byte_t *data, int length,
                   int version, int mode, int eclevel, int masktype, int maxnum,
-                  int format, int magnify, int separator, int order)
+                  int format, int scale, int separator, int order)
 {
     PyObject *result = NULL;
     QRStructured *st;
@@ -533,7 +476,7 @@ PyQR_ProcessMulti(const qr_byte_t *data, int length,
         return NULL;
     }
 
-    symbol = PyQR_GetSymbols(st, format, separator, magnify, order, &size);
+    symbol = PyQR_GetSymbols(st, format, separator, scale, order, &size);
     if (symbol) {
         result = PyQR_SymbolFromString(symbol, size, format);
         free(symbol);
@@ -584,17 +527,30 @@ PyQR_CreateMulti(const qr_byte_t *data, int size,
 /* {{{ PyQR_GetSymbols() */
 
 static qr_byte_t *
-PyQR_GetSymbols(QRStructured * st,
-                int format, int separator, int magnify,
+PyQR_GetSymbols(QRStructured *st,
+                int format, int separator, int scale,
                 int order, int *size)
 {
-    qr_byte_t *symbol;
+    qr_byte_t *symbol = NULL;
+    int errcode = QR_ERR_NONE;
+    QRStructured *cp = qrsClone(st, &errcode);
 
-    symbol = qrsGetSymbols(st, format, separator, magnify, order, size);
     if (symbol == NULL) {
         PyQR_SetError(qrsGetErrorCode(st), qrsGetErrorInfo(st));
         return NULL;
     }
+
+    if (qrsFinalize(cp)) {
+        symbol = qrsGetSymbols(st, format, separator, scale, order, size);
+        if (symbol == NULL) {
+            PyQR_SetError(qrsGetErrorCode(cp), qrsGetErrorInfo(cp));
+        }
+    }
+    else {
+        PyQR_SetError(qrsGetErrorCode(cp), qrsGetErrorInfo(cp));
+    }
+
+    qrsDestroy(cp);
 
     return symbol;
 }
@@ -640,7 +596,7 @@ PyQR_AddData(QRCodeObject *obj, const qr_byte_t *data, int size, int mode)
 
 static PyObject *
 PyQR_GetSymbol_FromObject(QRCodeObject *obj,
-                          int format, int separator, int magnify, int order)
+                          int format, int separator, int scale, int order)
 {
     PyObject *result = NULL;
     qr_byte_t *symbol = NULL;
@@ -663,7 +619,7 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
             }
             is_copy = 1;
         }
-        symbol = PyQR_GetSymbol(qr, format, separator, magnify, &size);
+        symbol = PyQR_GetSymbol(qr, format, separator, scale, &size);
         if (is_copy) {
             qrDestroy(qr);
         }
@@ -683,7 +639,7 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
             }
             is_copy = 1;
         }
-        symbol = PyQR_GetSymbols(st, format, separator, magnify, order, &size);
+        symbol = PyQR_GetSymbols(st, format, separator, scale, order, &size);
         if (is_copy) {
             qrsDestroy(st);
         }
@@ -801,7 +757,7 @@ QRCode_init(QRCodeObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {
         "version", "mode", "eclevel", "masktype", "maxnum",
-        "format", "separator", "magnify", "order",
+        "format", "separator", "scale", "order",
         NULL
     };
 
@@ -812,8 +768,8 @@ QRCode_init(QRCodeObject *self, PyObject *args, PyObject *kwds)
     int masktype = -1;
     int maxnum = 1;
 
-    self->format = QR_FMT_DIGIT;
-    self->magnify = 1;
+    self->format = QR_FMT_PNG;
+    self->scale = 1;
     self->separator = 4;
     self->order = 0;
 
@@ -823,7 +779,7 @@ QRCode_init(QRCodeObject *self, PyObject *args, PyObject *kwds)
                                      &version, &mode, &eclevel,
                                      &masktype, &maxnum,
                                      &self->format, &self->separator,
-                                     &self->magnify, &self->order)
+                                     &self->scale, &self->order)
     ) {
         return -1;
     }
