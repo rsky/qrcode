@@ -2441,7 +2441,7 @@ qrGetSymbol(QRCode *qr, int fmt, int sep, int mag, int *size)
 		qrSymbolToASCII
 	};
 
-	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT) {
+	if (fmt < 0 || fmt >= QR_FMT_COUNT) {
 		qrSetErrorInfo(qr, QR_ERR_INVALID_FMT, NULL);
 		return NULL;
 	}
@@ -2542,7 +2542,7 @@ qrsGetSymbols(QRStructured *st, int fmt, int sep, int mag, int order, int *size)
 		qrsSymbolsToASCII
 	};
 
-	if (fmt < QR_FMT_DIGIT || fmt >= QR_FMT_COUNT) {
+	if (fmt < 0 || fmt >= QR_FMT_COUNT) {
 		qrSetErrorInfo(st->cur, QR_ERR_INVALID_FMT, NULL);
 		return NULL;
 	}
