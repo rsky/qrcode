@@ -464,7 +464,7 @@ qrStrError(int errcode)
 		return "Not yet implemented";
 
 	  case QR_ERR_STATE:
-		return "Not allowed upon current state";
+		return "Not allowed in the current state";
 
 	  case QR_ERR_FOPEN:
 		return "Failed to open file";
