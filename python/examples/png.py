@@ -4,5 +4,5 @@
 import qr
 
 f = open('spam.png', 'w')
-f.write(qr.qrcode('spam, egg', format = qr.FMT_PNG, magnify = 2))
+f.write(qr.qrcode('spam, egg', format = qr.FMT_PNG, scale = 8))
 f.close()
