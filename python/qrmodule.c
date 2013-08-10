@@ -365,6 +365,37 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused)
 }
 
 /* }}} */
+/* {{{ PyQR_SymbolDataFromStringAndSize() */
+
+#if PY_MAJOR_VERSION >= 3
+static inline PyObject *
+PyQR_SymbolDataFromStringAndSize3(qr_byte_t *bytes, int size, int format)
+{
+    switch (format) {
+        case QR_FMT_PBM:
+        case QR_FMT_SVG:
+        case QR_FMT_JSON:
+        case QR_FMT_DIGIT:
+        case QR_FMT_ASCII:
+            return PyUnicode_FromStringAndSize((char *)bytes, size);
+        default:
+            return PyBytes_FromStringAndSize((char *)bytes, size);
+    }
+}
+#define PyQR_SymbolDataFromStringAndSize(bytes, size, format) \
+    PyQR_SymbolDataFromStringAndSize3(bytes, size, format)
+#else
+static inline PyObject *
+PyQR_SymbolDataFromStringAndSize2(qr_byte_t *bytes, int size)
+{
+    return PyString_FromStringAndSize((char *)bytes, size);
+}
+#define PyQR_SymbolDataFromStringAndSize(bytes, size, format) \
+    PyQR_SymbolDataFromStringAndSize2(bytes, size)
+#endif
+
+/* }}} */
+
 /* {{{ PyQR_Process() */
 
 static PyObject *
@@ -692,28 +723,6 @@ PyQR_GetSymbol_FromObject(QRCodeObject *obj,
     }
 
     return result;
-}
-
-/* }}} */
-/* {{{ PyQR_SymbolDataFromStringAndSize() */
-
-static PyObject *
-PyQR_SymbolDataFromStringAndSize(qr_byte_t *bytes, int size, int format)
-{
-#if PY_MAJOR_VERSION >= 3
-    switch (format) {
-        case QR_FMT_PBM:
-        case QR_FMT_SVG:
-        case QR_FMT_JSON:
-        case QR_FMT_DIGIT:
-        case QR_FMT_ASCII:
-            return PyUnicode_FromStringAndSize((char *)bytes, size);
-        default:
-            return PyBytes_FromStringAndSize((char *)bytes, size);
-    }
-#else
-    return PyString_FromStringAndSize((char *)bytes, size);
-#endif
 }
 
 /* }}} */

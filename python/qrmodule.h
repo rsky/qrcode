@@ -76,12 +76,12 @@ QRCode_get_info(QRCodeObject *self, PyObject *unused);
 static PyObject *
 PyQR_Process(const qr_byte_t *data, int size,
              int version, int mode, int eclevel, int masktype,
-             int format, int magnify, int separator);
+             int format, int scale, int separator);
 
 static PyObject *
 PyQR_ProcessMulti(const qr_byte_t *data, int size,
                   int version, int mode, int eclevel, int masktype, int maxnum,
-                  int format, int magnify, int separator, int order);
+                  int format, int scale, int separator, int order);
 
 static QRCode *
 PyQR_Create(const qr_byte_t *data, int length,
@@ -93,19 +93,16 @@ PyQR_CreateMulti(const qr_byte_t *data, int length,
 
 static qr_byte_t *
 PyQR_GetSymbol(QRCode *qr,
-               int format, int separator, int magnify, int *size);
+               int format, int separator, int scale, int *size);
 
 static qr_byte_t *
 PyQR_GetSymbols(QRStructured *st,
-                int format, int separator, int magnify,
+                int format, int separator, int scale,
                 int order, int *size);
 
 static PyObject *
 PyQR_GetSymbol_FromObject(QRCodeObject *obj,
-                          int format, int separator, int magnify, int order);
-
-static PyObject *
-PyQR_SymbolDataFromStringAndSize(qr_byte_t *bytes, int size, int format);
+                          int format, int separator, int scale, int order);
 
 static PyObject *
 PyQR_SymbolImageFromStringAndSize(qr_byte_t *bytes, int size);
