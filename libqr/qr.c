@@ -2258,10 +2258,7 @@ qrFinalize(QRCode *qr)
 	int i = 0;
 	int ret = TRUE;
 
-	if (!qrHasData(qr)) {
-		qrSetErrorInfo(qr, QR_ERR_STATE, _QR_FUNCTION);
-		return FALSE;
-	} else if (qrIsFinalized(qr)) {
+	if (qrIsFinalized(qr)) {
 		return TRUE;
 	}
 
