@@ -701,10 +701,16 @@ static PyObject *
 PyQR_GetString_FromSymbol(qr_byte_t *bytes, int size, int format)
 {
 #if PY_MAJOR_VERSION >= 3
-    if (format <= QR_FMT_PBM || format == QR_FMT_SVG) {
-        return PyUnicode_FromStringAndSize((char *)bytes, size);
+    switch (format) {
+        case QR_FMT_PBM:
+        case QR_FMT_SVG:
+        case QR_FMT_JSON:
+        case QR_FMT_DIGIT:
+        case QR_FMT_ASCII:
+            return PyUnicode_FromStringAndSize((char *)bytes, size);
+        default:
+            return PyBytes_FromStringAndSize((char *)bytes, size);
     }
-    return PyBytes_FromStringAndSize((char *)bytes, size);
 #else
     return PyString_FromStringAndSize((char *)bytes, size);
 #endif
