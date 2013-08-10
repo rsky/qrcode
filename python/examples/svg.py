@@ -3,6 +3,6 @@
 
 import qr
 
-f = open('spam' + qr.extension(qr.SVG) , 'w')
+f = open('spam' + qr.extension(qr.SVG) , 'wb')
 f.write(qr.qrcode('spam, egg', format = qr.SVG, separator = 0))
 f.close()

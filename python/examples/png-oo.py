@@ -8,4 +8,4 @@ q.add_data('spam, egg')
 q.format = qr.PNG
 q.scale = 8
 
-open('spamegg.png', 'w').write(q.get_symbol())
+open('spamegg.png', 'wb').write(q.get_symbol())
